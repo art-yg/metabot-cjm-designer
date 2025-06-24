@@ -1,0 +1,187 @@
+"use client"
+
+import React from "react"
+import { Handle, Position, type NodeProps } from "reactflow"
+import { Database, User, Bot, BarChart3 } from "lucide-react"
+import NodeBase from "./node-base"
+import type { LogWayData } from "@/lib/analytics-types"
+
+export type CustomFieldValueType = "string" | "number" | "boolean" | "datetime" | "json"
+export type CustomFieldScope = "lead" | "bot"
+
+export interface CustomFieldNodeData {
+  code: string
+  type: "set_custom_field"
+  label: string // Client-side label
+  scope: CustomFieldScope
+  key: string
+  value: string
+  value_type: CustomFieldValueType
+  next_step: string | null
+  log_way_steps?: LogWayData // Встроенная аналитика
+}
+
+function CustomFieldNode({
+  data,
+  selected,
+  id,
+  isConnectable,
+  xPos,
+  yPos,
+  zIndex,
+  type,
+}: NodeProps<CustomFieldNodeData>) {
+  const ScopeIcon = data.scope === "lead" ? User : Bot
+  const scopeColor = data.scope === "lead" ? "text-blue-600" : "text-purple-600"
+
+  const getValueTypeLabel = (valueType: CustomFieldValueType): string => {
+    const labels = {
+      string: "Текст",
+      number: "Число",
+      boolean: "Да/Нет",
+      datetime: "Дата",
+      json: "JSON",
+    }
+    return labels[valueType] || valueType
+  }
+
+  const hasAnalytics = data.log_way_steps && data.log_way_steps.steps.length > 0
+
+  return (
+    <NodeBase
+      data={data}
+      selected={selected}
+      id={id}
+      isConnectable={isConnectable}
+      xPos={xPos}
+      yPos={yPos}
+      zIndex={zIndex}
+      type={type}
+      headerIcon={
+        <div className="flex items-center">
+          <Database size={18} className="mr-2 text-indigo-600" />
+          <ScopeIcon size={14} className={scopeColor} />
+          {hasAnalytics && (
+            <BarChart3
+              size={14}
+              className="text-emerald-500 ml-1"
+              title={`Has ${data.log_way_steps.steps.length} analytics entries`}
+            />
+          )}
+        </div>
+      }
+    >
+      <div className="space-y-1">
+        <div className="flex items-center text-xs">
+          <span className="font-medium text-gray-600">Область:</span>
+          <span className={`ml-1 font-medium ${scopeColor}`}>{data.scope === "lead" ? "Лид" : "Бот"}</span>
+        </div>
+        <div className="text-xs">
+          <span className="font-medium text-gray-600">Поле:</span>
+          <span className="ml-1 break-words">
+            {data.key || <span className="italic text-gray-400">не указано</span>}
+          </span>
+        </div>
+        <div className="text-xs">
+          <span className="font-medium text-gray-600">Тип:</span>
+          <span className="ml-1">{getValueTypeLabel(data.value_type)}</span>
+        </div>
+        <div className="text-xs max-h-8 overflow-y-auto custom-scrollbar">
+          <span className="font-medium text-gray-600">Значение:</span>
+          <div className="break-words mt-1">
+            {data.value || <span className="italic text-gray-400">не указано</span>}
+          </div>
+        </div>
+        {hasAnalytics && (
+          <div className="border-t pt-2 mt-2">
+            <div className="text-xs font-medium text-gray-700 mb-1 flex items-center">
+              <BarChart3 size={12} className="mr-1 text-emerald-600" />
+              Аналитика ({data.log_way_steps.steps.length}):
+            </div>
+            <div className="space-y-1">
+              {data.log_way_steps.steps.map((step, index) => {
+                const getTypeColor = () => {
+                  switch (step.type) {
+                    case "step":
+                      return "bg-blue-50 border-blue-200 text-blue-800"
+                    case "event":
+                      return "bg-green-50 border-green-200 text-green-800"
+                    case "tag":
+                      return "bg-purple-50 border-purple-200 text-purple-800"
+                    case "utter":
+                      return "bg-orange-50 border-orange-200 text-orange-800"
+                    default:
+                      return "bg-gray-50 border-gray-200 text-gray-800"
+                  }
+                }
+
+                return (
+                  <div key={step.id || index} className={`text-xs border rounded px-2 py-1 ${getTypeColor()}`}>
+                    <div className="font-medium mb-1">
+                      {index + 1}. {step.type.toUpperCase()}
+                    </div>
+                    <div className="space-y-0.5">
+                      {step.type === "step" && (
+                        <>
+                          {step.way && (
+                            <div className="truncate">
+                              <span className="text-gray-600">Путь:</span> {step.way}
+                            </div>
+                          )}
+                          {step.step && (
+                            <div className="truncate">
+                              <span className="text-gray-600">Шаг:</span> {step.step}
+                            </div>
+                          )}
+                        </>
+                      )}
+                      {step.type === "event" && step.event && (
+                        <div className="truncate">
+                          <span className="text-gray-600">Событие:</span> {step.event}
+                        </div>
+                      )}
+                      {step.type === "tag" && (
+                        <>
+                          {step.tag && (
+                            <div className="truncate">
+                              <span className="text-gray-600">Тег:</span> {step.tag}
+                            </div>
+                          )}
+                          {step.tag_action && (
+                            <div className="truncate">
+                              <span className="text-gray-600">Действие:</span> {step.tag_action}
+                            </div>
+                          )}
+                        </>
+                      )}
+                      {step.type === "utter" && step.utter && (
+                        <div className="truncate">
+                          <span className="text-gray-600">Текст:</span> {step.utter}
+                        </div>
+                      )}
+                      {step.way && step.type !== "step" && (
+                        <div className="truncate">
+                          <span className="text-gray-600">Путь:</span> {step.way}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        id="next_step"
+        className="!w-3 !h-3 !bg-indigo-500"
+        style={{ bottom: -6 }}
+        isConnectable={isConnectable}
+      />
+    </NodeBase>
+  )
+}
+
+export default React.memo(CustomFieldNode)
