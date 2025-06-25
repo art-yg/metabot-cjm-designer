@@ -22,7 +22,7 @@ function ButtonEditor({ buttons, onButtonsChange }: ButtonEditorProps) {
     const newButton: SendTextButton = {
       id: uuidv4(),
       title: "",
-      target_code: null,
+      next_step: null, // было: target_code: null
       row: 1,
       input_code: "",
       js_condition: "",
@@ -97,7 +97,7 @@ function ButtonEditor({ buttons, onButtonsChange }: ButtonEditorProps) {
                     <span className="font-medium">
                       {index + 1}. {button.title || "Без названия"}
                     </span>
-                    {button.target_code && <span className="ml-2 text-green-600 text-xs">→ {button.target_code}</span>}
+                    {button.next_step && <span className="ml-2 text-green-600 text-xs">→ {button.next_step}</span>}
                     {button.value && <span className="ml-2 text-purple-600 text-xs">= {button.value}</span>}
                   </div>
                   <div className="flex items-center space-x-1 mr-2">
@@ -155,13 +155,13 @@ function ButtonEditor({ buttons, onButtonsChange }: ButtonEditorProps) {
                   </div>
 
                   <div>
-                    <Label htmlFor={`target-${button.id}`} className="text-xs font-medium text-gray-600">
+                    <Label htmlFor={`next_step-${button.id}`} className="text-xs font-medium text-gray-600">
                       Переход к шагу <span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id={`target-${button.id}`}
-                      value={button.target_code || ""}
-                      onChange={(e) => updateButton(index, "target_code", e.target.value || null)}
+                      id={`next_step-${button.id}`}
+                      value={button.next_step || ""}
+                      onChange={(e) => updateButton(index, "next_step", e.target.value || null)}
                       className="h-8 text-xs mt-1"
                       placeholder="Код шага для перехода"
                     />

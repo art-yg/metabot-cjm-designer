@@ -27,50 +27,35 @@ function SendTextNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, t
   const hasAnalytics = data.log_way_steps && data.log_way_steps.steps.length > 0
 
   // Get unique buttons with valid target_code and title for handles
-  const validButtons = hasButtons ? data.buttons.filter((btn) => btn.title.trim() && btn.target_code?.trim()) : []
+  const validButtons = hasButtons ? data.buttons.filter((btn) => btn.title.trim() && btn.next_step?.trim()) : []
 
-  // Calculate handle positions for buttons distributed across left, right, and bottom sides
+  // Calculate handle positions for buttons distributed across left and right sides
+  // Bottom is reserved for the standard next_step handle
   const getButtonHandlePositions = () => {
     if (validButtons.length === 0) return []
 
     const positions: { id: string; position: Position; offset: number; label: string }[] = []
 
-    // Distribute buttons across three sides: Bottom, Left, Right
+    // Distribute buttons across left and right sides only
     validButtons.forEach((button, index) => {
-      const sideIndex = index % 3 // Cycle through 3 sides
-      const positionInSide = Math.floor(index / 3) // Which position on that side
+      const isLeft = index % 2 === 0 // Alternate between left and right
+      const positionInSide = Math.floor(index / 2) // Which position on that side
 
       let position: Position
       let offset: number
 
-      switch (sideIndex) {
-        case 0: // Bottom
-          position = Position.Bottom
-          // Distribute evenly across bottom, accounting for multiple rows
-          const bottomCount = Math.ceil(validButtons.length / 3)
-          const bottomStep = 1 / (bottomCount + 1)
-          offset = (positionInSide + 1) * bottomStep * 100
-          break
-
-        case 1: // Left
-          position = Position.Left
-          // Distribute evenly across left side
-          const leftCount = Math.ceil((validButtons.length - 1) / 3)
-          const leftStep = leftCount > 0 ? 1 / (leftCount + 1) : 0.5
-          offset = leftCount > 0 ? (positionInSide + 1) * leftStep * 100 : 50
-          break
-
-        case 2: // Right
-          position = Position.Right
-          // Distribute evenly across right side
-          const rightCount = Math.ceil((validButtons.length - 2) / 3)
-          const rightStep = rightCount > 0 ? 1 / (rightCount + 1) : 0.5
-          offset = rightCount > 0 ? (positionInSide + 1) * rightStep * 100 : 50
-          break
-
-        default:
-          position = Position.Bottom
-          offset = 50
+      if (isLeft) {
+        position = Position.Left
+        // Distribute evenly across left side
+        const leftCount = Math.ceil(validButtons.length / 2)
+        const leftStep = leftCount > 0 ? 1 / (leftCount + 1) : 0.5
+        offset = leftCount > 0 ? (positionInSide + 1) * leftStep * 100 : 50
+      } else {
+        position = Position.Right
+        // Distribute evenly across right side
+        const rightCount = Math.floor(validButtons.length / 2)
+        const rightStep = rightCount > 0 ? 1 / (rightCount + 1) : 0.5
+        offset = rightCount > 0 ? (positionInSide + 1) * rightStep * 100 : 50
       }
 
       positions.push({
@@ -85,7 +70,6 @@ function SendTextNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, t
   }
 
   const buttonHandlePositions = getButtonHandlePositions()
-  const showNextStepHandle = !hasButtons || validButtons.length === 0
 
   return (
     <div className="relative">
@@ -231,28 +215,20 @@ function SendTextNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, t
         </div>
       </NodeBase>
 
-      {/* Default next_step handle (only if no buttons or no valid buttons) */}
-      {showNextStepHandle && (
-        <Handle
-          type="source"
-          position={Position.Bottom}
-          id="next_step"
-          className="!w-3 !h-3 !bg-orange-500"
-          style={{ bottom: -6 }}
-          isConnectable={isConnectable}
-        />
-      )}
+      {/* Standard next_step handle - ALWAYS show at bottom center */}
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        id="next_step"
+        className="!w-3 !h-3 !bg-orange-500"
+        style={{ bottom: -6, left: "50%", transform: "translateX(-50%)" }}
+        isConnectable={isConnectable}
+      />
 
-      {/* Button handles distributed across sides */}
+      {/* Button handles distributed across left and right sides */}
       {buttonHandlePositions.map((handle) => {
         const getHandleStyle = () => {
           switch (handle.position) {
-            case Position.Bottom:
-              return {
-                left: `${handle.offset}%`,
-                bottom: -6,
-                transform: "translateX(-50%)",
-              }
             case Position.Left:
               return {
                 left: -6,
@@ -267,42 +243,44 @@ function SendTextNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, t
               }
             default:
               return {
-                left: `${handle.offset}%`,
-                bottom: -6,
-                transform: "translateX(-50%)",
+                left: -6,
+                top: `${handle.offset}%`,
+                transform: "translateY(-50%)",
               }
           }
         }
 
         const getLabelStyle = () => {
           switch (handle.position) {
-            case Position.Bottom:
-              return {
-                left: `${handle.offset}%`,
-                bottom: -24,
-                transform: "translateX(-50%)",
-              }
             case Position.Left:
               return {
-                left: -60,
+                left: -120, // Increased space for full text
                 top: `${handle.offset}%`,
                 transform: "translateY(-50%)",
-                width: "50px",
+                width: "110px", // Increased width
                 textAlign: "right" as const,
+                whiteSpace: "normal" as const, // Allow text wrapping
+                lineHeight: "1.2",
               }
             case Position.Right:
               return {
-                right: -60,
+                right: -120, // Increased space for full text
                 top: `${handle.offset}%`,
                 transform: "translateY(-50%)",
-                width: "50px",
+                width: "110px", // Increased width
                 textAlign: "left" as const,
+                whiteSpace: "normal" as const, // Allow text wrapping
+                lineHeight: "1.2",
               }
             default:
               return {
-                left: `${handle.offset}%`,
-                bottom: -24,
-                transform: "translateX(-50%)",
+                left: -120,
+                top: `${handle.offset}%`,
+                transform: "translateY(-50%)",
+                width: "110px",
+                textAlign: "right" as const,
+                whiteSpace: "normal" as const,
+                lineHeight: "1.2",
               }
           }
         }
@@ -317,10 +295,7 @@ function SendTextNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, t
               style={getHandleStyle()}
               isConnectable={isConnectable}
             />
-            <div
-              className="absolute text-xs font-medium text-green-700 truncate max-w-[50px] text-center"
-              style={getLabelStyle()}
-            >
+            <div className="absolute text-xs font-medium text-green-700" style={getLabelStyle()}>
               {handle.label}
             </div>
           </React.Fragment>

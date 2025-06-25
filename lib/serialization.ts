@@ -62,7 +62,7 @@ export function importFromJson(jsonString: string): {
       if (step.type === "go_to_map_entry") return
 
       // Handle next_step for all node types (only if no buttons for send_text)
-      if (step.next_step && (!step.buttons || step.buttons.length === 0)) {
+      if (step.next_step) {
         if (nodes.find((n) => n.id === step.next_step)) {
           const edge: Edge = {
             id: `${step.code}-next-${step.next_step}`,
@@ -83,13 +83,16 @@ export function importFromJson(jsonString: string): {
       // Handle button connections for send_text nodes
       if (step.type === "send_text" && step.buttons && Array.isArray(step.buttons)) {
         const nodeData = node.data as any
+
+        // Поддержка старого формата target_code
         step.buttons.forEach((button: any, index: number) => {
-          if (button.target_code && button.title?.trim()) {
-            if (nodes.find((n) => n.id === button.target_code)) {
+          const targetStep = button.next_step || button.target_code
+          if (targetStep && button.title?.trim()) {
+            if (nodes.find((n) => n.id === targetStep)) {
               const edge: Edge = {
-                id: `${step.code}-button${index}-${button.target_code}`,
+                id: `${step.code}-button${index}-${targetStep}`,
                 source: step.code,
-                target: button.target_code,
+                target: targetStep,
                 sourceHandle: `button_${nodeData.buttons[index].id}`,
                 type: "smoothstep",
                 animated: true,
@@ -97,7 +100,7 @@ export function importFromJson(jsonString: string): {
               edges.push(edge)
             } else {
               console.warn(
-                `Edge target node ${button.target_code} for source ${step.code} (button ${index}) not found. Skipping edge.`,
+                `Edge target node ${targetStep} for source ${step.code} (button ${index}) not found. Skipping edge.`,
               )
             }
           }

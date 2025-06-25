@@ -17,13 +17,13 @@ export function exportSendText(node: Node<SendTextNodeData>) {
   const processedData = { ...restData }
   if (processedData.buttons && processedData.buttons.length > 0) {
     // Export ALL buttons, even if they have empty fields
-    const allButtons = processedData.buttons.map(({ id, ...buttonData }) => {
+    const allButtons = processedData.buttons.map(({ id, target_code, ...buttonData }) => {
       // Clean up empty value field if it's empty string
       if (buttonData.value === "") {
         const { value, ...cleanButtonData } = buttonData
-        return cleanButtonData
+        return { ...cleanButtonData, next_step: target_code }
       }
-      return buttonData
+      return { ...buttonData, next_step: target_code }
     })
 
     processedData.buttons = allButtons

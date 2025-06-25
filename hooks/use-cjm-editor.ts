@@ -34,6 +34,44 @@ export function useCJMEditor() {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const { fitView, screenToFlowPosition } = useReactFlow()
 
+  // Helper function to create/update button connections
+  const updateButtonConnections = useCallback(
+    (nodeId: string, newData: Partial<CJMNodeData>) => {
+      if (newData.type === "send_text" && newData.buttons) {
+        const sendTextData = newData as any
+        const validButtons = sendTextData.buttons.filter((btn: any) => btn.title?.trim() && btn.next_step?.trim())
+
+        setEdges((currentEdges) => {
+          // Remove existing button edges for this node
+          const filteredEdges = currentEdges.filter(
+            (edge) => !(edge.source === nodeId && edge.sourceHandle?.startsWith("button_")),
+          )
+
+          // Add new button edges
+          const newButtonEdges: Edge[] = []
+          validButtons.forEach((button: any) => {
+            // Check if target node exists
+            const targetExists = nodes.some((node) => node.id === button.next_step)
+            if (targetExists) {
+              const newEdge: Edge = {
+                id: `${nodeId}-button-${button.id}-${button.next_step}`,
+                source: nodeId,
+                target: button.next_step,
+                sourceHandle: `button_${button.id}`,
+                type: "smoothstep",
+                animated: true,
+              }
+              newButtonEdges.push(newEdge)
+            }
+          })
+
+          return [...filteredEdges, ...newButtonEdges]
+        })
+      }
+    },
+    [nodes, setEdges],
+  )
+
   // Node changes handler
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
@@ -68,6 +106,15 @@ export function useCJMEditor() {
                   if (sourceHandle === "timeout_step") {
                     if ((newData as any).timeout) {
                       ;(newData as any).timeout.exit_step = null
+                    }
+                  } else if (sourceHandle.startsWith("button_")) {
+                    // Handle button edge removal
+                    const buttonId = sourceHandle.replace("button_", "")
+                    if ((newData as any).buttons) {
+                      const updatedButtons = (newData as any).buttons.map((btn: any) =>
+                        btn.id === buttonId ? { ...btn, next_step: null } : btn,
+                      )
+                      ;(newData as any).buttons = updatedButtons
                     }
                   } else {
                     ;(newData as any)[sourceHandle] = null
@@ -137,7 +184,7 @@ export function useCJMEditor() {
               const buttonId = sourceHandle.replace("button_", "")
               const buttons = (newData as any).buttons || []
               const updatedButtons = buttons.map((btn: any) =>
-                btn.id === buttonId ? { ...btn, target_code: target } : btn,
+                btn.id === buttonId ? { ...btn, next_step: target } : btn,
               )
               ;(newData as any).buttons = updatedButtons
             } else if (sourceHandle === "timeout_step") {
@@ -265,8 +312,11 @@ export function useCJMEditor() {
       if (selectedNode && selectedNode.id === nodeId) {
         setSelectedNode((prev) => (prev ? { ...prev, data: { ...prev.data, ...newData } as CJMNodeData } : null))
       }
+
+      // Update button connections if this is a send_text node with buttons
+      updateButtonConnections(nodeId, newData)
     },
-    [setNodes, selectedNode],
+    [setNodes, selectedNode, updateButtonConnections],
   )
 
   // Operations handlers

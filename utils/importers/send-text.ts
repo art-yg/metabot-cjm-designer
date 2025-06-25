@@ -9,7 +9,7 @@ export function importSendText(step: any): Node<SendTextNodeData> {
   const importedButtons: SendTextButton[] = (step.buttons || []).map((btn: any) => ({
     id: uuidv4(), // Add client-side ID
     title: btn.title || "", // Import even if empty
-    target_code: btn.target_code || null, // Import even if null
+    next_step: btn.next_step || btn.target_code || null, // поддержка старого формата
     row: btn.row || 1,
     input_code: btn.input_code || "",
     js_condition: btn.js_condition || "",
