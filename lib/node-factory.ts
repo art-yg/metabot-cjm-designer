@@ -36,9 +36,9 @@ export class NodeFactory {
         next_step: null,
         label: "Send Text",
         content_per_channel: {},
-        buttons: undefined, // Start with no buttons
-        buttons_value_target: undefined, // Start with no value target
-        log_way_steps: undefined, // Start with no analytics
+        buttons: undefined,
+        buttons_value_target: undefined,
+        log_way_steps: undefined, // ✅ Аналитика доступна
       },
       options,
     )
@@ -58,7 +58,7 @@ export class NodeFactory {
         next_step: null,
         exit_step: null,
         reminders: [],
-        log_way_steps: undefined, // Start with no analytics
+        log_way_steps: undefined, // ✅ Аналитика доступна
       },
       options,
     )
@@ -75,6 +75,7 @@ export class NodeFactory {
         label: "Запустить скрипт",
         script_code: "",
         note: "",
+        // ❌ Аналитика недоступна (терминальная команда)
       },
       options,
     )
@@ -91,6 +92,7 @@ export class NodeFactory {
         name: "Стартовая точка",
         label: "Точка входа",
         next_step: null,
+        // ❌ Аналитика недоступна (служебная команда)
       },
       options,
     )
@@ -108,6 +110,7 @@ export class NodeFactory {
         entry_point: "",
         note: "",
         label: "Переход в воронку",
+        // ❌ Аналитика недоступна (терминальная команда)
       },
       options,
     )
@@ -129,6 +132,7 @@ export class NodeFactory {
           seconds: 0,
         },
         next_step: null,
+        // ❌ Аналитика недоступна (пассивная команда)
       },
       options,
     )
@@ -145,7 +149,7 @@ export class NodeFactory {
         label: tagType === "add_tags" ? "Добавить теги" : "Удалить теги",
         tags: [],
         next_step: null,
-        log_way_steps: undefined, // Start with no analytics
+        log_way_steps: undefined, // ✅ Аналитика доступна
       },
       options,
     )
@@ -165,7 +169,7 @@ export class NodeFactory {
         value: "",
         value_type: "string",
         next_step: null,
-        log_way_steps: undefined, // Start with no analytics
+        log_way_steps: undefined, // ✅ Аналитика доступна
       },
       options,
     )
@@ -183,7 +187,7 @@ export class NodeFactory {
         condition: "",
         next_step: null,
         else_step: null,
-        log_way_steps: undefined, // Start with no analytics
+        // ❌ Аналитика недоступна (развилка логики)
       },
       options,
     )
@@ -200,7 +204,7 @@ export class NodeFactory {
         label: "Switch",
         cases: [],
         default_step: null,
-        log_way_steps: undefined, // Start with no analytics
+        // ❌ Аналитика недоступна (развилка логики)
       },
       options,
     )
@@ -224,6 +228,7 @@ export class NodeFactory {
         utter: "",
         note: "",
         next_step: null,
+        // ❌ Аналитика недоступна (сама является командой аналитики)
       },
       options,
     )

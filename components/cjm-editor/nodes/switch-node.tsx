@@ -2,9 +2,8 @@
 
 import React from "react"
 import { Handle, Position, type NodeProps } from "reactflow"
-import { SwitchCamera, BarChart3 } from "lucide-react"
+import { SwitchCamera } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { LogWayData } from "@/lib/analytics-types"
 
 export interface SwitchCase {
   id: string // Client-side ID for React keys
@@ -18,7 +17,7 @@ export interface SwitchNodeData {
   label: string // Client-side label
   cases: SwitchCase[]
   default_step: string | null
-  log_way_steps?: LogWayData // Встроенная аналитика
+  // ❌ Убрали log_way_steps - развилки не логируют аналитику
 }
 
 function SwitchNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, type }: NodeProps<SwitchNodeData>) {
@@ -108,7 +107,6 @@ function SwitchNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, typ
   }
 
   const handlePositions = getHandlePositions()
-  const hasAnalytics = data.log_way_steps && data.log_way_steps.steps.length > 0
 
   return (
     <div
@@ -131,13 +129,6 @@ function SwitchNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, typ
         <div className="flex items-center justify-center mb-2">
           <SwitchCamera size={20} className="text-blue-800 mr-2" />
           <span className="font-semibold text-sm text-blue-900">{data.label || "Switch"}</span>
-          {hasAnalytics && (
-            <BarChart3
-              size={14}
-              className="text-emerald-600 ml-2"
-              title={`Has ${data.log_way_steps.steps.length} analytics entries`}
-            />
-          )}
         </div>
 
         <div className="text-xs text-blue-800 text-center max-h-[80px] overflow-y-auto custom-scrollbar">

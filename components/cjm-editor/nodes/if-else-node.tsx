@@ -2,9 +2,8 @@
 
 import React from "react"
 import { Handle, Position, type NodeProps } from "reactflow"
-import { GitBranch, BarChart3 } from "lucide-react"
+import { GitBranch } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { LogWayData } from "@/lib/analytics-types"
 
 export interface IfElseNodeData {
   code: string
@@ -13,12 +12,10 @@ export interface IfElseNodeData {
   condition: string
   next_step: string | null // Then branch (true)
   else_step: string | null // Else branch (false)
-  log_way_steps?: LogWayData // Встроенная аналитика
+  // ❌ Убрали log_way_steps - развилки не логируют аналитику
 }
 
 function IfElseNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, type }: NodeProps<IfElseNodeData>) {
-  const hasAnalytics = data.log_way_steps && data.log_way_steps.steps.length > 0
-
   return (
     <div
       className={cn(
@@ -40,13 +37,6 @@ function IfElseNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, typ
         <div className="flex items-center justify-center mb-2">
           <GitBranch size={20} className="text-yellow-800 mr-2" />
           <span className="font-semibold text-sm text-yellow-900">{data.label || "Условие"}</span>
-          {hasAnalytics && (
-            <BarChart3
-              size={14}
-              className="text-emerald-600 ml-2"
-              title={`Has ${data.log_way_steps.steps.length} analytics entries`}
-            />
-          )}
         </div>
         <div className="text-xs text-yellow-800 text-center max-w-full overflow-hidden">
           {data.condition ? (
