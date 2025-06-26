@@ -11,34 +11,35 @@ export class NodeFactory {
   }
 
   private createBaseNode<T extends CJMNodeData>(
-    nodeType: string,
-    reactFlowType: string,
+    nodeType: string, // This seems to be the React Flow node type
+    reactFlowType: string, // This is the React Flow node type string
     data: T,
     options?: NodeFactoryOptions,
   ): CJMNode {
     return {
       id: data.code,
-      type: reactFlowType,
+      type: reactFlowType, // Use the reactFlowType string here
       position: options?.position || this.getDefaultPosition(),
       data,
-    } as CJMNode
+    } as CJMNode // Cast to CJMNode which expects Node<CJMNodeData>
   }
 
   createSendTextNode(options?: NodeFactoryOptions): CJMNode {
     const nodeId = `send_text_${uuidv4().substring(0, 8)}`
     return this.createBaseNode(
-      "sendText",
-      "sendText",
+      "sendText", // React Flow node type
+      "sendText", // React Flow node type string
       {
         code: nodeId,
-        type: "send_text",
+        type: "send_text", // Internal data type
         content: "New universal message...",
         next_step: null,
-        label: "Send Text",
-        content_per_channel: {},
+        label: "Send Text", // Client-side label
+        content_per_channel: {}, // Default as empty object
         buttons: undefined,
         buttons_value_target: undefined,
-        log_way_steps: undefined, // ✅ Аналитика доступна
+        log_way_steps: undefined,
+        links: undefined, // Initialize new links property
       },
       options,
     )
@@ -58,7 +59,7 @@ export class NodeFactory {
         next_step: null,
         exit_step: null,
         reminders: [],
-        log_way_steps: undefined, // ✅ Аналитика доступна
+        log_way_steps: undefined,
       },
       options,
     )
@@ -75,7 +76,6 @@ export class NodeFactory {
         label: "Запустить скрипт",
         script_code: "",
         note: "",
-        // ❌ Аналитика недоступна (терминальная команда)
       },
       options,
     )
@@ -92,7 +92,6 @@ export class NodeFactory {
         name: "Стартовая точка",
         label: "Точка входа",
         next_step: null,
-        // ❌ Аналитика недоступна (служебная команда)
       },
       options,
     )
@@ -110,7 +109,6 @@ export class NodeFactory {
         entry_point: "",
         note: "",
         label: "Переход в воронку",
-        // ❌ Аналитика недоступна (терминальная команда)
       },
       options,
     )
@@ -132,7 +130,6 @@ export class NodeFactory {
           seconds: 0,
         },
         next_step: null,
-        // ❌ Аналитика недоступна (пассивная команда)
       },
       options,
     )
@@ -149,7 +146,7 @@ export class NodeFactory {
         label: tagType === "add_tags" ? "Добавить теги" : "Удалить теги",
         tags: [],
         next_step: null,
-        log_way_steps: undefined, // ✅ Аналитика доступна
+        log_way_steps: undefined,
       },
       options,
     )
@@ -169,7 +166,7 @@ export class NodeFactory {
         value: "",
         value_type: "string",
         next_step: null,
-        log_way_steps: undefined, // ✅ Аналитика доступна
+        log_way_steps: undefined,
       },
       options,
     )
@@ -185,9 +182,8 @@ export class NodeFactory {
         type: "if_else",
         label: "Условие",
         condition: "",
-        next_step: null,
-        else_step: null,
-        // ❌ Аналитика недоступна (развилка логики)
+        next_step: null, // For 'true' branch
+        else_step: null, // For 'false' branch
       },
       options,
     )
@@ -204,7 +200,6 @@ export class NodeFactory {
         label: "Switch",
         cases: [],
         default_step: null,
-        // ❌ Аналитика недоступна (развилка логики)
       },
       options,
     )
@@ -219,7 +214,7 @@ export class NodeFactory {
         code: nodeId,
         type: "log_action",
         label: "Записать в аналитику",
-        log_type: "step",
+        log_type: "step", // Default log_type
         way: "",
         step: "",
         event: "",
@@ -228,12 +223,10 @@ export class NodeFactory {
         utter: "",
         note: "",
         next_step: null,
-        // ❌ Аналитика недоступна (сама является командой аналитики)
       },
       options,
     )
   }
 }
 
-// Экспортируем синглтон для использования
 export const nodeFactory = new NodeFactory()

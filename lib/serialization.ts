@@ -10,6 +10,7 @@ export function exportToJson(nodes: Node<CJMNodeData>[], edges: Edge[], mapSetti
       bot_id: mapSettings.bot_id,
       code: mapSettings.code,
       title: mapSettings.title,
+      channels: mapSettings.channels, // Добавляем экспорт каналов
       steps: nodes.map((node) => exportNode(node)),
     },
   }
@@ -32,11 +33,17 @@ export function importFromJson(jsonString: string): {
     const scriptParams = parsed.script_request_params
     const steps = scriptParams.steps
 
-    // Extract map settings from JSON
+    // Extract map settings from JSON с поддержкой каналов
     const mapSettings: MapSettings | undefined = {
       bot_id: scriptParams.bot_id || 2370,
       code: scriptParams.code || "cjm_001",
       title: scriptParams.title || "Импортированная карта",
+      channels: scriptParams.channels || {
+        telegram_bot_name: "",
+        whatsapp_phone_number: "",
+        vk_group_name: "",
+        use_chat_widget: false,
+      },
     }
 
     const nodes: Node<CJMNodeData>[] = []

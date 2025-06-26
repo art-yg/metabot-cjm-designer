@@ -1,5 +1,6 @@
 "use client"
 import type { CJMNode } from "@/app/cjm-editor/types"
+import type { MapSettings } from "@/lib/map-settings"
 import BaseEditor from "./base-editor"
 import SendTextEditor from "./send-text-editor"
 import ValueInputEditor from "./value-input-editor"
@@ -17,14 +18,17 @@ interface EditorFactoryProps {
   node: CJMNode
   onClose: () => void
   onUpdateData: (nodeId: string, newData: any) => void
+  mapSettings: MapSettings
 }
 
 // Типы команд с аналитикой (точки выполнения действий)
 const ANALYTICS_ENABLED_TYPES = ["send_text", "value_input", "add_tags", "remove_tags", "set_custom_field"] as const
 
-function EditorFactory({ node, onClose, onUpdateData }: EditorFactoryProps) {
+function EditorFactory({ node, onClose, onUpdateData, mapSettings }: EditorFactoryProps) {
   const nodeType = node.data.type
   const withAnalytics = ANALYTICS_ENABLED_TYPES.includes(nodeType as any)
+
+  console.log("EditorFactory mapSettings:", mapSettings)
 
   const renderEditor = () => {
     switch (nodeType) {
@@ -35,7 +39,7 @@ function EditorFactory({ node, onClose, onUpdateData }: EditorFactoryProps) {
       case "run_custom_script":
         return <RunScriptEditor node={node} onUpdateData={onUpdateData} />
       case "entry_point":
-        return <EntryPointEditor node={node} onUpdateData={onUpdateData} />
+        return <EntryPointEditor node={node} onUpdateData={onUpdateData} mapSettings={mapSettings} />
       case "go_to_map_entry":
         return <GoToMapEntryEditor node={node} onUpdateData={onUpdateData} />
       case "wait":

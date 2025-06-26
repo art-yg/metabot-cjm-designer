@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useCallback, useRef, useEffect } from "react"
 import {
   useNodesState,
@@ -15,7 +14,7 @@ import {
   type EdgeChange,
 } from "reactflow"
 import { toast } from "react-hot-toast"
-import type { CJMNode, CJMNodeData } from "@/app/cjm-editor/page"
+import type { CJMNode, CJMNodeData, SendTextNodeData } from "@/app/cjm-editor/page"
 import type { MapSettings } from "@/lib/map-settings"
 import { DEFAULT_MAP_SETTINGS } from "@/lib/map-settings"
 import { nodeFactory } from "@/lib/node-factory"
@@ -32,44 +31,92 @@ export function useCJMEditor() {
   const [isJsonModalOpen, setIsJsonModalOpen] = useState(false)
   const [mapSettings, setMapSettings] = useState<MapSettings>(DEFAULT_MAP_SETTINGS)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
-  const { fitView, screenToFlowPosition } = useReactFlow()
+  const { fitView, screenToFlowPosition, deleteElements } = useReactFlow()
 
-  // Helper function to create/update button connections
-  const updateButtonConnections = useCallback(
-    (nodeId: string, newData: Partial<CJMNodeData>) => {
-      if (newData.type === "send_text" && newData.buttons) {
-        const sendTextData = newData as any
-        const validButtons = sendTextData.buttons.filter((btn: any) => btn.title?.trim() && btn.next_step?.trim())
+  // Helper function to create trigger edges for send_text nodes
+  const createTriggerEdges = useCallback((nodes: CJMNode[]): Edge[] => {
+    const triggerEdges: Edge[] = []
 
-        setEdges((currentEdges) => {
-          // Remove existing button edges for this node
-          const filteredEdges = currentEdges.filter(
-            (edge) => !(edge.source === nodeId && edge.sourceHandle?.startsWith("button_")),
-          )
-
-          // Add new button edges
-          const newButtonEdges: Edge[] = []
-          validButtons.forEach((button: any) => {
-            // Check if target node exists
-            const targetExists = nodes.some((node) => node.id === button.next_step)
-            if (targetExists) {
-              const newEdge: Edge = {
-                id: `${nodeId}-button-${button.id}-${button.next_step}`,
-                source: nodeId,
-                target: button.next_step,
-                sourceHandle: `button_${button.id}`,
-                type: "smoothstep",
-                animated: true,
+    nodes.forEach((node) => {
+      if (node.data.type === "send_text" && (node.data as SendTextNodeData).links) {
+        const sendTextData = node.data as SendTextNodeData
+        sendTextData.links?.forEach((link) => {
+          link.triggers?.forEach((trigger) => {
+            if (trigger.active) {
+              // Create edge for on_true next_step
+              if (trigger.on_true?.next_step) {
+                const targetExists = nodes.some((n) => n.id === trigger.on_true!.next_step)
+                if (targetExists) {
+                  triggerEdges.push({
+                    id: `${node.id}-trigger-${trigger.id}-true-${trigger.on_true.next_step}`,
+                    source: node.id,
+                    target: trigger.on_true.next_step,
+                    sourceHandle: `${trigger.id}_true`,
+                    type: "smoothstep",
+                    animated: true,
+                  })
+                }
               }
-              newButtonEdges.push(newEdge)
+
+              // Create edge for on_false next_step
+              if (trigger.on_false?.next_step) {
+                const targetExists = nodes.some((n) => n.id === trigger.on_false!.next_step)
+                if (targetExists) {
+                  triggerEdges.push({
+                    id: `${node.id}-trigger-${trigger.id}-false-${trigger.on_false.next_step}`,
+                    source: node.id,
+                    target: trigger.on_false.next_step,
+                    sourceHandle: `${trigger.id}_false`,
+                    type: "smoothstep",
+                    animated: true,
+                  })
+                }
+              }
             }
           })
-
-          return [...filteredEdges, ...newButtonEdges]
         })
       }
+    })
+
+    return triggerEdges
+  }, [])
+
+  const updateNodeAndConnections = useCallback(
+    (nodeId: string, updateFn: (nodeData: CJMNodeData) => CJMNodeData) => {
+      let affectedNode: CJMNode | undefined
+      setNodes((nds) => {
+        const updatedNodes = nds.map((n) => {
+          if (n.id === nodeId) {
+            affectedNode = { ...n, data: updateFn(n.data) }
+            return affectedNode
+          }
+          return n
+        })
+
+        // Update trigger edges when node data changes
+        if (affectedNode && affectedNode.data.type === "send_text") {
+          const newTriggerEdges = createTriggerEdges(updatedNodes)
+          setEdges((currentEdges) => {
+            // Remove existing trigger edges for this node
+            const filteredEdges = currentEdges.filter(
+              (edge) =>
+                !(
+                  edge.source === nodeId &&
+                  (edge.sourceHandle?.endsWith("_true") || edge.sourceHandle?.endsWith("_false"))
+                ),
+            )
+            return [...filteredEdges, ...newTriggerEdges.filter((edge) => edge.source === nodeId)]
+          })
+        }
+
+        return updatedNodes
+      })
+
+      if (selectedNode && selectedNode.id === nodeId && affectedNode) {
+        setSelectedNode(affectedNode)
+      }
     },
-    [nodes, setEdges],
+    [setNodes, selectedNode, createTriggerEdges, setEdges],
   )
 
   // Node changes handler
@@ -94,125 +141,135 @@ export function useCJMEditor() {
   // Edge changes handler
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
+      onEdgesChangeGeneric(changes)
+
       changes.forEach((change) => {
         if (change.type === "remove") {
           const removedEdge = edges.find((edge) => edge.id === change.id)
-          if (removedEdge && removedEdge.sourceHandle) {
+          if (removedEdge && removedEdge.source && removedEdge.sourceHandle) {
             const { source, sourceHandle } = removedEdge
-            setNodes((nds) =>
-              nds.map((node) => {
-                if (node.id === source) {
-                  const newData = { ...node.data }
-                  if (sourceHandle === "timeout_step") {
-                    if ((newData as any).timeout) {
-                      ;(newData as any).timeout.exit_step = null
+            updateNodeAndConnections(source, (data) => {
+              const newData = { ...data }
+              if (sourceHandle === "next_step" && "next_step" in newData) (newData as any).next_step = null
+              else if (sourceHandle === "else_step" && "else_step" in newData) (newData as any).else_step = null
+              else if (sourceHandle === "default_step" && "default_step" in newData)
+                (newData as any).default_step = null
+              else if (sourceHandle === "exit_step" && "exit_step" in newData) (newData as any).exit_step = null
+              else if (sourceHandle === "timeout_step" && "timeout" in newData && (newData as any).timeout) {
+                ;(newData as any).timeout.exit_step = null
+              } else if (sourceHandle.startsWith("button_") && newData.type === "send_text") {
+                const buttonId = sourceHandle.replace("button_", "")
+                ;(newData as SendTextNodeData).buttons = ((newData as SendTextNodeData).buttons || []).map((btn) =>
+                  btn.id === buttonId ? { ...btn, next_step: null } : btn,
+                )
+              } else if (sourceHandle.startsWith("case_") && newData.type === "switch") {
+                const caseId = sourceHandle.replace("case_", "")
+                ;(newData as any).cases = ((newData as any).cases || []).map((c: any) =>
+                  c.id === caseId ? { ...c, next_step: null } : c,
+                )
+              } else if (
+                (sourceHandle.endsWith("_true") || sourceHandle.endsWith("_false")) &&
+                newData.type === "send_text" &&
+                (newData as SendTextNodeData).links
+              ) {
+                const triggerId = sourceHandle.substring(0, sourceHandle.lastIndexOf("_"))
+                const conditionType = sourceHandle.substring(sourceHandle.lastIndexOf("_") + 1) as "true" | "false"
+                ;(newData as SendTextNodeData).links = ((newData as SendTextNodeData).links || []).map((link) => ({
+                  ...link,
+                  triggers: (link.triggers || []).map((trigger) => {
+                    if (trigger.id === triggerId) {
+                      const actionBlockKey = conditionType === "true" ? "on_true" : "on_false"
+                      return {
+                        ...trigger,
+                        [actionBlockKey]: {
+                          ...(trigger[actionBlockKey] || {}),
+                          next_step: null,
+                        },
+                      }
                     }
-                  } else if (sourceHandle.startsWith("button_")) {
-                    // Handle button edge removal
-                    const buttonId = sourceHandle.replace("button_", "")
-                    if ((newData as any).buttons) {
-                      const updatedButtons = (newData as any).buttons.map((btn: any) =>
-                        btn.id === buttonId ? { ...btn, next_step: null } : btn,
-                      )
-                      ;(newData as any).buttons = updatedButtons
-                    }
-                  } else {
-                    ;(newData as any)[sourceHandle] = null
-                  }
-                  return { ...node, data: newData }
-                }
-                return node
-              }),
-            )
+                    return trigger
+                  }),
+                }))
+              }
+              return newData
+            })
           }
         }
       })
-      onEdgesChangeGeneric(changes)
     },
-    [edges, setNodes, onEdgesChangeGeneric],
+    [edges, updateNodeAndConnections, onEdgesChangeGeneric],
   )
 
-  // Connection handler with auto-replacement for single-output nodes
+  // Connection handler
   const onConnect: OnConnect = useCallback(
     (connection) => {
       if (!connection.source || !connection.target || !connection.sourceHandle) return
-
       const { source, target, sourceHandle } = connection
 
-      // Определяем узлы, которые должны иметь только одно исходящее соединение
-      const singleOutputHandles = new Set(["next_step"])
+      const singleOutputHandles = new Set(["next_step", "else_step", "default_step", "exit_step", "timeout_step"])
       const sourceNode = nodes.find((n) => n.id === source)
 
-      // Если это handle с единственным выходом, удаляем существующее соединение
       if (singleOutputHandles.has(sourceHandle) && sourceNode) {
         const existingEdge = edges.find((edge) => edge.source === source && edge.sourceHandle === sourceHandle)
-
         if (existingEdge) {
-          // Удаляем старое соединение
           setEdges((eds) => eds.filter((edge) => edge.id !== existingEdge.id))
-
-          // Очищаем данные в старом узле
-          setNodes((nds) =>
-            nds.map((node) => {
-              if (node.id === source) {
-                const newData = { ...node.data }
-                if (sourceHandle === "timeout_step") {
-                  if ((newData as any).timeout) {
-                    ;(newData as any).timeout.exit_step = null
-                  }
-                } else {
-                  ;(newData as any)[sourceHandle] = null
-                }
-                return { ...node, data: newData }
-              }
-              return node
-            }),
-          )
-
-          toast.info("Previous connection replaced with new one")
+          toast("Previous connection replaced.")
         }
       }
 
-      // Создаем новое соединение
-      setNodes((nds) =>
-        nds.map((node) => {
-          if (node.id === source) {
-            const newData = { ...node.data }
-
-            // Handle button connections for send_text nodes
-            if (sourceHandle.startsWith("button_") && newData.type === "send_text") {
-              const buttonId = sourceHandle.replace("button_", "")
-              const buttons = (newData as any).buttons || []
-              const updatedButtons = buttons.map((btn: any) =>
-                btn.id === buttonId ? { ...btn, next_step: target } : btn,
-              )
-              ;(newData as any).buttons = updatedButtons
-            } else if (sourceHandle === "timeout_step") {
-              ;(newData as any).timeout = {
-                ...(newData as any).timeout,
-                exit_step: target,
+      updateNodeAndConnections(source, (data) => {
+        const newData = { ...data }
+        if (sourceHandle === "next_step" && "next_step" in newData) (newData as any).next_step = target
+        else if (sourceHandle === "else_step" && "else_step" in newData) (newData as any).else_step = target
+        else if (sourceHandle === "default_step" && "default_step" in newData) (newData as any).default_step = target
+        else if (sourceHandle === "exit_step" && "exit_step" in newData) (newData as any).exit_step = target
+        else if (sourceHandle === "timeout_step" && "timeout" in newData) {
+          ;(newData as any).timeout = { ...((newData as any).timeout || {}), exit_step: target }
+        } else if (sourceHandle.startsWith("button_") && newData.type === "send_text") {
+          const buttonId = sourceHandle.replace("button_", "")
+          ;(newData as SendTextNodeData).buttons = ((newData as SendTextNodeData).buttons || []).map((btn) =>
+            btn.id === buttonId ? { ...btn, next_step: target } : btn,
+          )
+        } else if (sourceHandle.startsWith("case_") && newData.type === "switch") {
+          const caseId = sourceHandle.replace("case_", "")
+          ;(newData as any).cases = ((newData as any).cases || []).map((c: any) =>
+            c.id === caseId ? { ...c, next_step: target } : c,
+          )
+        } else if (
+          (sourceHandle.endsWith("_true") || sourceHandle.endsWith("_false")) &&
+          newData.type === "send_text" &&
+          (newData as SendTextNodeData).links
+        ) {
+          const triggerId = sourceHandle.substring(0, sourceHandle.lastIndexOf("_"))
+          const conditionType = sourceHandle.substring(sourceHandle.lastIndexOf("_") + 1) as "true" | "false"
+          ;(newData as SendTextNodeData).links = ((newData as SendTextNodeData).links || []).map((link) => ({
+            ...link,
+            triggers: (link.triggers || []).map((trigger) => {
+              if (trigger.id === triggerId) {
+                const actionBlockKey = conditionType === "true" ? "on_true" : "on_false"
+                return {
+                  ...trigger,
+                  [actionBlockKey]: {
+                    ...(trigger[actionBlockKey] || {}),
+                    next_step: target,
+                  },
+                }
               }
-            } else {
-              ;(newData as any)[sourceHandle] = target
-            }
-            return { ...node, data: newData }
-          }
-          return node
-        }),
-      )
+              return trigger
+            }),
+          }))
+        }
+        return newData
+      })
+
       setEdges((eds) => addEdge({ ...connection, type: "smoothstep", animated: true }, eds))
       toast.success("Steps connected!")
     },
-    [setNodes, setEdges, nodes, edges],
+    [nodes, edges, setEdges, updateNodeAndConnections],
   )
 
-  // Connection validation with auto-replacement for single-output handles
-  const isValidConnection: IsValidConnection = useCallback((connection) => {
-    // Всегда разрешаем соединение - логика замены будет в onConnect
-    return true
-  }, [])
+  const isValidConnection: IsValidConnection = useCallback(() => true, [])
 
-  // Helper function to add node at center
   const addNodeAtCenter = useCallback(
     (newNode: CJMNode) => {
       let position = { x: 100, y: 100 }
@@ -229,97 +286,34 @@ export function useCJMEditor() {
     [setNodes, screenToFlowPosition],
   )
 
-  // Node creation handlers
   const nodeCreators = {
-    addSendTextNode: useCallback(() => {
-      const newNode = nodeFactory.createSendTextNode()
-      addNodeAtCenter(newNode)
-      toast.success("New Send Text step added!")
-    }, [addNodeAtCenter]),
-
-    addInputNode: useCallback(() => {
-      const newNode = nodeFactory.createValueInputNode()
-      addNodeAtCenter(newNode)
-      toast.success("New User Input step added!")
-    }, [addNodeAtCenter]),
-
-    addRunScriptNode: useCallback(() => {
-      const newNode = nodeFactory.createRunScriptNode()
-      addNodeAtCenter(newNode)
-      toast.success("New Run Script step added!")
-    }, [addNodeAtCenter]),
-
-    addEntryPointNode: useCallback(() => {
-      const newNode = nodeFactory.createEntryPointNode()
-      addNodeAtCenter(newNode)
-      toast.success("New Entry Point added!")
-    }, [addNodeAtCenter]),
-
-    addGoToMapEntryNode: useCallback(() => {
-      const newNode = nodeFactory.createGoToMapEntryNode()
-      addNodeAtCenter(newNode)
-      toast.success("New Go to Map Entry added!")
-    }, [addNodeAtCenter]),
-
-    addWaitNode: useCallback(() => {
-      const newNode = nodeFactory.createWaitNode()
-      addNodeAtCenter(newNode)
-      toast.success("New Wait step added!")
-    }, [addNodeAtCenter]),
-
+    addSendTextNode: useCallback(() => addNodeAtCenter(nodeFactory.createSendTextNode()), [addNodeAtCenter]),
+    addInputNode: useCallback(() => addNodeAtCenter(nodeFactory.createValueInputNode()), [addNodeAtCenter]),
+    addRunScriptNode: useCallback(() => addNodeAtCenter(nodeFactory.createRunScriptNode()), [addNodeAtCenter]),
+    addEntryPointNode: useCallback(() => addNodeAtCenter(nodeFactory.createEntryPointNode()), [addNodeAtCenter]),
+    addGoToMapEntryNode: useCallback(() => addNodeAtCenter(nodeFactory.createGoToMapEntryNode()), [addNodeAtCenter]),
+    addWaitNode: useCallback(() => addNodeAtCenter(nodeFactory.createWaitNode()), [addNodeAtCenter]),
     addTagsNode: useCallback(
-      (tagType: "add_tags" | "remove_tags") => {
-        const newNode = nodeFactory.createTagsNode(tagType)
-        addNodeAtCenter(newNode)
-        toast.success(`New ${tagType === "add_tags" ? "Add Tags" : "Remove Tags"} step added!`)
-      },
+      (type: "add_tags" | "remove_tags") => addNodeAtCenter(nodeFactory.createTagsNode(type)),
       [addNodeAtCenter],
     ),
-
-    addCustomFieldNode: useCallback(() => {
-      const newNode = nodeFactory.createCustomFieldNode()
-      addNodeAtCenter(newNode)
-      toast.success("New Custom Field step added!")
-    }, [addNodeAtCenter]),
-
-    addIfElseNode: useCallback(() => {
-      const newNode = nodeFactory.createIfElseNode()
-      addNodeAtCenter(newNode)
-      toast.success("New IF/ELSE condition added!")
-    }, [addNodeAtCenter]),
-
-    addSwitchNode: useCallback(() => {
-      const newNode = nodeFactory.createSwitchNode()
-      addNodeAtCenter(newNode)
-      toast.success("New SWITCH condition added!")
-    }, [addNodeAtCenter]),
-
-    addLogActionNode: useCallback(() => {
-      const newNode = nodeFactory.createLogActionNode()
-      addNodeAtCenter(newNode)
-      toast.success("New Log to Analytics step added!")
-    }, [addNodeAtCenter]),
+    addCustomFieldNode: useCallback(() => addNodeAtCenter(nodeFactory.createCustomFieldNode()), [addNodeAtCenter]),
+    addIfElseNode: useCallback(() => addNodeAtCenter(nodeFactory.createIfElseNode()), [addNodeAtCenter]),
+    addSwitchNode: useCallback(() => addNodeAtCenter(nodeFactory.createSwitchNode()), [addNodeAtCenter]),
+    addLogActionNode: useCallback(() => addNodeAtCenter(nodeFactory.createLogActionNode()), [addNodeAtCenter]),
   }
 
-  // Event handlers
   const onNodeClick = useCallback((event: React.MouseEvent, node: CJMNode) => {
     setSelectedNode(node)
   }, [])
 
   const onUpdateNodeData = useCallback(
     (nodeId: string, newData: Partial<CJMNodeData>) => {
-      setNodes((nds) => nds.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...newData } } : n)))
-      if (selectedNode && selectedNode.id === nodeId) {
-        setSelectedNode((prev) => (prev ? { ...prev, data: { ...prev.data, ...newData } as CJMNodeData } : null))
-      }
-
-      // Update button connections if this is a send_text node with buttons
-      updateButtonConnections(nodeId, newData)
+      updateNodeAndConnections(nodeId, (currentData) => ({ ...currentData, ...newData }))
     },
-    [setNodes, selectedNode, updateButtonConnections],
+    [updateNodeAndConnections],
   )
 
-  // Operations handlers
   const operations = {
     exportToMetabot: useCallback(async () => {
       try {
@@ -327,6 +321,8 @@ export function useCJMEditor() {
       } catch (error) {
         if (error instanceof Error && error.message.includes("настройки карты")) {
           setIsSettingsModalOpen(true)
+        } else {
+          toast.error((error as Error).message || "Export failed")
         }
       }
     }, [nodes, edges, mapSettings]),
@@ -343,8 +339,13 @@ export function useCJMEditor() {
             edges: importedEdges,
             mapSettings: importedSettings,
           } = cjmOperations.importFromJson(jsonString)
+
+          // Create trigger edges for imported nodes
+          const triggerEdges = createTriggerEdges(importedNodes)
+          const allEdges = [...importedEdges, ...triggerEdges]
+
           setNodes(importedNodes)
-          setEdges(importedEdges)
+          setEdges(allEdges)
           if (importedSettings) {
             setMapSettings(importedSettings)
           }
@@ -356,10 +357,10 @@ export function useCJMEditor() {
             }
           }, 100)
         } catch (error) {
-          throw error
+          toast.error((error as Error).message || "Import failed")
         }
       },
-      [setNodes, setEdges, fitView],
+      [setNodes, setEdges, fitView, setMapSettings, createTriggerEdges],
     ),
 
     saveDraft: useCallback(() => {
@@ -369,8 +370,12 @@ export function useCJMEditor() {
     loadDraft: useCallback(() => {
       const draft = cjmOperations.loadDraft()
       if (draft) {
+        // Create trigger edges for loaded nodes
+        const triggerEdges = createTriggerEdges(draft.nodes)
+        const allEdges = [...draft.edges, ...triggerEdges]
+
         setNodes(draft.nodes)
-        setEdges(draft.edges)
+        setEdges(allEdges)
         if (draft.mapSettings) {
           setMapSettings(draft.mapSettings)
         }
@@ -381,18 +386,18 @@ export function useCJMEditor() {
             fitView({ padding: 0.2, duration: 800 })
           }
         }, 100)
+      } else {
+        toast("No draft found to load.")
       }
-    }, [setNodes, setEdges, fitView]),
+    }, [setNodes, setEdges, fitView, setMapSettings, createTriggerEdges]),
   }
 
-  // Load draft on mount
   useEffect(() => {
     operations.loadDraft()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return {
-    // State
     nodes,
     edges,
     selectedNode,
@@ -400,28 +405,18 @@ export function useCJMEditor() {
     isJsonModalOpen,
     isSettingsModalOpen,
     reactFlowWrapper,
-
-    // State setters
     setSelectedNode,
     setMapSettings,
     setIsJsonModalOpen,
     setIsSettingsModalOpen,
-
-    // React Flow handlers
     onNodesChange,
     onEdgesChange,
     onConnect,
     isValidConnection,
     onNodeClick,
     onUpdateNodeData,
-
-    // Node creators
     ...nodeCreators,
-
-    // Operations
     ...operations,
-
-    // Utilities
     getExportJson: () => cjmOperations.exportToJson({ nodes, edges, mapSettings }),
   }
 }

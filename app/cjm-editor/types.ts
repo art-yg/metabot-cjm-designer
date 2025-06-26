@@ -15,6 +15,10 @@ export type { IfElseNodeData } from "@/components/cjm-editor/nodes/if-else-node"
 export type { SwitchNodeData, SwitchCase } from "@/components/cjm-editor/nodes/switch-node"
 export type { LogActionNodeData, LogActionType, TagAction } from "@/components/cjm-editor/nodes/log-action-node"
 
+// New types for Links and Triggers
+export type { Link } from "@/lib/link-types"
+export type { Trigger, TriggerActionBlock, TriggerEventType } from "@/lib/trigger-types"
+
 import type { Node } from "reactflow"
 import type {
   SendTextNodeData,
@@ -28,7 +32,7 @@ import type {
   IfElseNodeData,
   SwitchNodeData,
   LogActionNodeData,
-} from "@/app/cjm-editor/types"
+} from "@/app/cjm-editor/types" // Self-reference is fine here
 
 // Union type for all node data
 export type CJMNodeData =

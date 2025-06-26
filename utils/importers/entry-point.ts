@@ -8,6 +8,7 @@ export function importEntryPoint(step: any): Node<EntryPointNodeData> {
     name: step.name || "Точка входа",
     label: "Точка входа",
     next_step: step.next_step || null,
+    deep_links: step.deep_links || [], // Добавляем поддержку deep_links
   }
 
   return {

@@ -1,60 +1,175 @@
 import type { Node } from "reactflow"
 import type { SendTextNodeData } from "@/components/cjm-editor/nodes/send-text-node"
+import type { Link } from "@/lib/link-types"
+import type { Trigger, TriggerActionBlock } from "@/lib/trigger-types"
+
+// Helper to convert camelCase to snake_case
+const toSnakeCase = (str: string): string => {
+  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`)
+}
+
+// Helper to convert object keys to snake_case
+const convertKeysToSnakeCase = (obj: any): any => {
+  if (obj === null || obj === undefined) return obj
+  if (Array.isArray(obj)) return obj.map(convertKeysToSnakeCase)
+  if (typeof obj !== "object") return obj
+
+  const converted: any = {}
+  for (const key in obj) {
+    const snakeKey = toSnakeCase(key)
+    converted[snakeKey] = convertKeysToSnakeCase(obj[key])
+  }
+  return converted
+}
+
+// Helper to clean action block for export
+const exportActionBlock = (block?: TriggerActionBlock): any | undefined => {
+  if (!block) return undefined
+  const { id, ...rest } = block // Remove client-side ID
+  let exportedBlock: any = { ...rest }
+
+  // Remove empty arrays and null/empty values
+  if (exportedBlock.add_tags && exportedBlock.add_tags.length === 0) {
+    const { add_tags, ...restBlock } = exportedBlock
+    exportedBlock = restBlock
+  }
+  if (exportedBlock.remove_tags && exportedBlock.remove_tags.length === 0) {
+    const { remove_tags, ...restBlock } = exportedBlock
+    exportedBlock = restBlock
+  }
+  if (exportedBlock.next_step === null || exportedBlock.next_step === "") {
+    const { next_step, ...restBlock } = exportedBlock
+    exportedBlock = restBlock
+  }
+  if (exportedBlock.run_after_minutes === null || exportedBlock.run_after_minutes === undefined) {
+    const { run_after_minutes, ...restBlock } = exportedBlock
+    exportedBlock = restBlock
+  }
+  if (exportedBlock.run_at_datetime === null || exportedBlock.run_at_datetime === "") {
+    const { run_at_datetime, ...restBlock } = exportedBlock
+    exportedBlock = restBlock
+  }
+
+  // Convert to snake_case
+  const snakeCaseBlock = convertKeysToSnakeCase(exportedBlock)
+  return Object.keys(snakeCaseBlock).length > 0 ? snakeCaseBlock : undefined
+}
+
+// Helper to clean trigger for export
+const exportTrigger = (trigger: Trigger): any => {
+  const { id, is_js_condition_custom, ...rest } = trigger // Remove client-side ID and custom flag
+  const exportedTrigger: any = { ...rest }
+
+  exportedTrigger.on_true = exportActionBlock(trigger.on_true)
+  exportedTrigger.on_false = exportActionBlock(trigger.on_false)
+
+  // Remove default/empty values
+  if (exportedTrigger.js_condition === "return true;") {
+    const { js_condition, ...restTrigger } = exportedTrigger
+    Object.assign(exportedTrigger, restTrigger)
+  }
+  if (exportedTrigger.run_after_minutes === null || exportedTrigger.run_after_minutes === undefined) {
+    const { run_after_minutes, ...restTrigger } = exportedTrigger
+    Object.assign(exportedTrigger, restTrigger)
+  }
+  if (exportedTrigger.run_at_datetime === null || exportedTrigger.run_at_datetime === "") {
+    const { run_at_datetime, ...restTrigger } = exportedTrigger
+    Object.assign(exportedTrigger, restTrigger)
+  }
+  if (exportedTrigger.event_value === null || exportedTrigger.event_value === "") {
+    const { event_value, ...restTrigger } = exportedTrigger
+    Object.assign(exportedTrigger, restTrigger)
+  }
+
+  // Convert to snake_case
+  return convertKeysToSnakeCase(exportedTrigger)
+}
+
+// Helper to clean link for export
+const exportLink = (link: Link): any => {
+  const { id, ...rest } = link // Remove client-side ID
+  const exportedLink: any = { ...rest }
+  if (link.triggers && link.triggers.length > 0) {
+    exportedLink.triggers = link.triggers.map(exportTrigger)
+  } else {
+    const { triggers, ...restLink } = exportedLink
+    Object.assign(exportedLink, restLink)
+  }
+  return exportedLink
+}
 
 export function exportSendText(node: Node<SendTextNodeData>) {
   const { label, ...restData } = node.data
+  const processedData: any = { ...restData } // Start with a mutable copy
 
   // Remove empty content_per_channel if it exists
-  if (restData.content_per_channel && Object.keys(restData.content_per_channel).length === 0) {
-    const { content_per_channel, ...sendTextRest } = restData
-    return {
-      ...sendTextRest,
-      coordinates: { x: Math.round(node.position.x), y: Math.round(node.position.y) },
-    }
+  if (processedData.content_per_channel && Object.keys(processedData.content_per_channel).length === 0) {
+    processedData.content_per_channel = undefined
   }
 
-  // Process buttons - remove client-side IDs but export ALL buttons
-  const processedData = { ...restData }
+  // Process buttons - remove client-side IDs
   if (processedData.buttons && processedData.buttons.length > 0) {
-    // Export ALL buttons, even if they have empty fields
-    const allButtons = processedData.buttons.map(({ id, target_code, ...buttonData }) => {
-      // Clean up empty value field if it's empty string
-      if (buttonData.value === "") {
-        const { value, ...cleanButtonData } = buttonData
-        return { ...cleanButtonData, next_step: target_code }
+    processedData.buttons = processedData.buttons.map(({ id, target_code, ...buttonData }: any) => {
+      const btn: any = { ...buttonData, next_step: target_code }
+      if (btn.value === "") {
+        const { value, ...restBtn } = btn
+        return restBtn
       }
-      return { ...buttonData, next_step: target_code }
+      return btn
     })
-
-    processedData.buttons = allButtons
   } else {
-    delete processedData.buttons // Remove if empty array
+    processedData.buttons = undefined
   }
 
   // Clean up buttons_value_target if key is empty
-  if (processedData.buttons_value_target && !processedData.buttons_value_target.key.trim()) {
-    delete processedData.buttons_value_target
+  if (processedData.buttons_value_target && !processedData.buttons_value_target.key?.trim()) {
+    processedData.buttons_value_target = undefined
   }
 
-  // Process log_way_steps - remove client-side IDs and export as log_way_steps
+  // Process log_way_steps - remove client-side IDs
   if (processedData.log_way_steps && processedData.log_way_steps.steps.length > 0) {
-    const exportedSteps = processedData.log_way_steps.steps.map(({ id, ...stepData }) => {
-      // Clean up empty fields
+    processedData.log_way_steps = processedData.log_way_steps.steps.map(({ id, ...stepData }: any) => {
       const cleanStep: any = { ...stepData }
-      if (!cleanStep.way?.trim()) delete cleanStep.way
-      if (!cleanStep.step?.trim()) delete cleanStep.step
-      if (!cleanStep.event?.trim()) delete cleanStep.event
-      if (!cleanStep.tag?.trim()) delete cleanStep.tag
-      if (!cleanStep.utter?.trim()) delete cleanStep.utter
+      // Clean up empty fields from log_way_steps
+      if (!cleanStep.way?.trim()) {
+        const { way, ...rest } = cleanStep
+        Object.assign(cleanStep, rest)
+      }
+      if (!cleanStep.step?.trim()) {
+        const { step, ...rest } = cleanStep
+        Object.assign(cleanStep, rest)
+      }
+      if (!cleanStep.event?.trim()) {
+        const { event, ...rest } = cleanStep
+        Object.assign(cleanStep, rest)
+      }
+      if (!cleanStep.tag?.trim()) {
+        const { tag, ...rest } = cleanStep
+        Object.assign(cleanStep, rest)
+      }
+      if (!cleanStep.utter?.trim()) {
+        const { utter, ...rest } = cleanStep
+        Object.assign(cleanStep, rest)
+      }
       return cleanStep
     })
-    processedData.log_way_steps = exportedSteps
+    if (processedData.log_way_steps.length === 0) processedData.log_way_steps = undefined
   } else {
-    delete processedData.log_way_steps
+    processedData.log_way_steps = undefined
   }
 
+  // Process links
+  if (processedData.links && processedData.links.length > 0) {
+    processedData.links = processedData.links.map(exportLink)
+  } else {
+    processedData.links = undefined
+  }
+
+  // Remove label before final export
+  const { label: removedLabel, ...finalData } = processedData
+
   return {
-    ...processedData,
+    ...finalData, // Contains all other fields like code, type, content, next_step etc.
     coordinates: { x: Math.round(node.position.x), y: Math.round(node.position.y) },
   }
 }

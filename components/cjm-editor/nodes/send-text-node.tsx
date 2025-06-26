@@ -2,74 +2,96 @@
 
 import React from "react"
 import { Handle, Position, type NodeProps } from "reactflow"
-import { MessageSquare, Layers, MousePointer, BarChart3 } from "lucide-react"
+import { MessageSquare, Layers, MousePointer, BarChart3, LinkIcon } from "lucide-react"
 import NodeBase from "./node-base"
 import type { ChannelOverrides } from "@/lib/channel-types"
 import type { SendTextButton, ButtonsValueTarget } from "@/lib/button-types"
 import type { LogWayData } from "@/lib/analytics-types"
+import type { Link } from "@/lib/link-types"
 
 export interface SendTextNodeData {
   code: string
-  label: string // Client-side label
-  content: string // Universal content
+  label: string
+  content: string
   type: "send_text"
   next_step: string | null
   content_per_channel?: ChannelOverrides
-  buttons?: SendTextButton[] // Кнопки
-  buttons_value_target?: ButtonsValueTarget // Новое поле - куда записывать значения кнопок
-  log_way_steps?: LogWayData // Встроенная аналитика
+  buttons?: SendTextButton[]
+  buttons_value_target?: ButtonsValueTarget
+  log_way_steps?: LogWayData
+  links?: Link[]
 }
 
-function SendTextNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, type }: NodeProps<SendTextNodeData>) {
+function SendTextNode({ data, selected, id, isConnectable }: NodeProps<SendTextNodeData>) {
   const hasChannelOverrides = data.content_per_channel && Object.keys(data.content_per_channel).length > 0
   const hasButtons = data.buttons && data.buttons.length > 0
   const hasValueTarget = data.buttons_value_target && data.buttons_value_target.key
   const hasAnalytics = data.log_way_steps && data.log_way_steps.steps.length > 0
+  const hasLinksWithTriggers =
+    data.links &&
+    data.links.some(
+      (link) => link.triggers && link.triggers.some((t) => t.active && (t.on_true?.next_step || t.on_false?.next_step)),
+    )
 
-  // Get unique buttons with valid target_code and title for handles
-  const validButtons = hasButtons ? data.buttons.filter((btn) => btn.title.trim() && btn.next_step?.trim()) : []
+  const validButtons = hasButtons ? data.buttons!.filter((btn) => btn.title.trim() && btn.next_step?.trim()) : []
 
-  // Calculate handle positions for buttons distributed across left and right sides
-  // Bottom is reserved for the standard next_step handle
   const getButtonHandlePositions = () => {
     if (validButtons.length === 0) return []
-
     const positions: { id: string; position: Position; offset: number; label: string }[] = []
-
-    // Distribute buttons across left and right sides only
     validButtons.forEach((button, index) => {
-      const isLeft = index % 2 === 0 // Alternate between left and right
-      const positionInSide = Math.floor(index / 2) // Which position on that side
-
-      let position: Position
-      let offset: number
-
-      if (isLeft) {
-        position = Position.Left
-        // Distribute evenly across left side
-        const leftCount = Math.ceil(validButtons.length / 2)
-        const leftStep = leftCount > 0 ? 1 / (leftCount + 1) : 0.5
-        offset = leftCount > 0 ? (positionInSide + 1) * leftStep * 100 : 50
-      } else {
-        position = Position.Right
-        // Distribute evenly across right side
-        const rightCount = Math.floor(validButtons.length / 2)
-        const rightStep = rightCount > 0 ? 1 / (rightCount + 1) : 0.5
-        offset = rightCount > 0 ? (positionInSide + 1) * rightStep * 100 : 50
-      }
-
+      const isLeft = index % 2 === 0
+      const positionInSide = Math.floor(index / 2)
+      const sideCount = isLeft ? Math.ceil(validButtons.length / 2) : Math.floor(validButtons.length / 2)
+      const step = sideCount > 0 ? 1 / (sideCount + 1) : 0.5
+      const offset = sideCount > 0 ? (positionInSide + 1) * step * 100 : 50
       positions.push({
         id: `button_${button.id}`,
-        position,
+        position: isLeft ? Position.Left : Position.Right,
         offset,
         label: button.title,
       })
     })
-
     return positions
   }
-
   const buttonHandlePositions = getButtonHandlePositions()
+
+  const triggerHandlePositions = React.useMemo(() => {
+    const positions: { id: string; position: Position; offset: number; label: string; color: string }[] = []
+    if (!data.links) return positions
+
+    let currentOffset = 25
+    const offsetIncrement = 15
+
+    data.links.forEach((link) => {
+      if (link.triggers) {
+        link.triggers.forEach((trigger) => {
+          if (trigger.active) {
+            if (trigger.on_true?.next_step) {
+              positions.push({
+                id: `${trigger.id}_true`,
+                position: Position.Right,
+                offset: currentOffset,
+                label: `${link.code} → ${trigger.title || trigger.code} (True)`,
+                color: "bg-green-500",
+              })
+              currentOffset += offsetIncrement
+            }
+            if (trigger.on_false?.next_step) {
+              positions.push({
+                id: `${trigger.id}_false`,
+                position: Position.Right,
+                offset: currentOffset,
+                label: `${link.code} → ${trigger.title || trigger.code} (False)`,
+                color: "bg-slate-500",
+              })
+              currentOffset += offsetIncrement
+            }
+          }
+        })
+      }
+    })
+    return positions
+  }, [data.links])
 
   return (
     <div className="relative">
@@ -78,15 +100,11 @@ function SendTextNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, t
         selected={selected}
         id={id}
         isConnectable={isConnectable}
-        xPos={xPos}
-        yPos={yPos}
-        zIndex={zIndex}
-        type={type}
         headerIcon={
           <div className="flex items-center">
             <MessageSquare size={18} className="mr-2 text-blue-600" />
             {hasChannelOverrides && (
-              <Layers size={14} className="text-indigo-500" title="Has channel-specific content" />
+              <Layers size={14} className="text-indigo-500 ml-1" title="Has channel-specific content" />
             )}
             {hasButtons && <MousePointer size={14} className="text-green-500 ml-1" title="Has buttons" />}
             {hasValueTarget && (
@@ -96,7 +114,14 @@ function SendTextNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, t
               <BarChart3
                 size={14}
                 className="text-emerald-500 ml-1"
-                title={`Has ${data.log_way_steps.steps.length} analytics entries`}
+                title={`Has ${data.log_way_steps!.steps.length} analytics entries`}
+              />
+            )}
+            {hasLinksWithTriggers && (
+              <LinkIcon
+                size={14}
+                className="text-sky-500 ml-1"
+                title="Has trackable links with active trigger outputs"
               />
             )}
           </div>
@@ -117,7 +142,7 @@ function SendTextNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, t
                 Кнопки:
               </div>
               <div className="space-y-1">
-                {data.buttons.map((button, index) => (
+                {data.buttons!.map((button, index) => (
                   <div key={button.id} className="text-xs bg-green-50 border border-green-200 rounded px-2 py-1">
                     <span className="font-medium text-green-800">
                       {index + 1}. {button.title || "Без названия"}
@@ -127,8 +152,8 @@ function SendTextNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, t
               </div>
               {hasValueTarget && (
                 <div className="text-xs text-purple-600 italic mt-1 flex items-center">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full mr-1" />→ {data.buttons_value_target.scope}.
-                  {data.buttons_value_target.key}
+                  <div className="w-2 h-2 bg-purple-500 rounded-full mr-1" />→ {data.buttons_value_target!.scope}.
+                  {data.buttons_value_target!.key}
                 </div>
               )}
             </div>
@@ -137,10 +162,10 @@ function SendTextNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, t
             <div className="border-t pt-2">
               <div className="text-xs font-medium text-gray-700 mb-1 flex items-center">
                 <BarChart3 size={12} className="mr-1 text-emerald-600" />
-                Аналитика ({data.log_way_steps.steps.length}):
+                Аналитика ({data.log_way_steps!.steps.length}):
               </div>
               <div className="space-y-1">
-                {data.log_way_steps.steps.map((step, index) => {
+                {data.log_way_steps!.steps.map((step, index) => {
                   const getTypeColor = () => {
                     switch (step.type) {
                       case "step":
@@ -212,10 +237,34 @@ function SendTextNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, t
               </div>
             </div>
           )}
+          {data.links && data.links.length > 0 && (
+            <div className="border-t pt-2">
+              <div className="text-xs font-medium text-gray-700 mb-1 flex items-center">
+                <LinkIcon size={12} className="mr-1 text-blue-600" />
+                Ссылки ({data.links.length}):
+              </div>
+              <div className="space-y-1">
+                {data.links.map((link, index) => (
+                  <div key={link.id} className="text-xs bg-blue-50 border border-blue-200 rounded px-2 py-1">
+                    <div className="font-medium text-blue-800">
+                      {index + 1}. {link.title || link.code}
+                    </div>
+                    <div className="text-blue-600 truncate text-xs mt-0.5" title={link.url}>
+                      {link.url}
+                    </div>
+                    {link.triggers && link.triggers.filter((t) => t.active).length > 0 && (
+                      <span className="text-xs text-sky-600">
+                        ({link.triggers.filter((t) => t.active).length} active triggers)
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </NodeBase>
 
-      {/* Standard next_step handle - ALWAYS show at bottom center */}
       <Handle
         type="source"
         position={Position.Bottom}
@@ -225,88 +274,67 @@ function SendTextNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, t
         isConnectable={isConnectable}
       />
 
-      {/* Button handles distributed across left and right sides */}
-      {buttonHandlePositions.map((handle) => {
-        const getHandleStyle = () => {
-          switch (handle.position) {
-            case Position.Left:
-              return {
-                left: -6,
-                top: `${handle.offset}%`,
-                transform: "translateY(-50%)",
-              }
-            case Position.Right:
-              return {
-                right: -6,
-                top: `${handle.offset}%`,
-                transform: "translateY(-50%)",
-              }
-            default:
-              return {
-                left: -6,
-                top: `${handle.offset}%`,
-                transform: "translateY(-50%)",
-              }
-          }
-        }
+      {buttonHandlePositions.map((handle) => (
+        <React.Fragment key={handle.id}>
+          <Handle
+            type="source"
+            position={handle.position}
+            id={handle.id}
+            className="!w-3 !h-3 !bg-green-600 !border-2 !border-white"
+            style={{
+              [handle.position === Position.Left ? "left" : "right"]: -6,
+              top: `${handle.offset}%`,
+              transform: "translateY(-50%)",
+            }}
+            isConnectable={isConnectable}
+          />
+          <div
+            className="absolute text-xs font-medium text-green-700 pointer-events-none"
+            style={{
+              [handle.position === Position.Left ? "left" : "right"]: -120,
+              top: `${handle.offset}%`,
+              transform: "translateY(-50%)",
+              width: "110px",
+              textAlign: handle.position === Position.Left ? "right" : "left",
+              whiteSpace: "normal",
+              lineHeight: "1.2",
+            }}
+          >
+            {handle.label}
+          </div>
+        </React.Fragment>
+      ))}
 
-        const getLabelStyle = () => {
-          switch (handle.position) {
-            case Position.Left:
-              return {
-                left: -120, // Increased space for full text
-                top: `${handle.offset}%`,
-                transform: "translateY(-50%)",
-                width: "110px", // Increased width
-                textAlign: "right" as const,
-                whiteSpace: "normal" as const, // Allow text wrapping
-                lineHeight: "1.2",
-              }
-            case Position.Right:
-              return {
-                right: -120, // Increased space for full text
-                top: `${handle.offset}%`,
-                transform: "translateY(-50%)",
-                width: "110px", // Increased width
-                textAlign: "left" as const,
-                whiteSpace: "normal" as const, // Allow text wrapping
-                lineHeight: "1.2",
-              }
-            default:
-              return {
-                left: -120,
-                top: `${handle.offset}%`,
-                transform: "translateY(-50%)",
-                width: "110px",
-                textAlign: "right" as const,
-                whiteSpace: "normal" as const,
-                lineHeight: "1.2",
-              }
-          }
-        }
-
-        return (
-          <React.Fragment key={handle.id}>
-            <Handle
-              type="source"
-              position={handle.position}
-              id={handle.id}
-              className="!w-3 !h-3 !bg-green-600 !border-2 !border-white"
-              style={getHandleStyle()}
-              isConnectable={isConnectable}
-            />
-            <div className="absolute text-xs font-medium text-green-700" style={getLabelStyle()}>
-              {handle.label}
-            </div>
-          </React.Fragment>
-        )
-      })}
+      {triggerHandlePositions.map((handle) => (
+        <React.Fragment key={handle.id}>
+          <Handle
+            type="source"
+            position={handle.position}
+            id={handle.id}
+            className={`!w-3 !h-3 ${handle.color} !border-2 !border-white`}
+            style={{ right: -6, top: `${handle.offset}%`, transform: "translateY(-50%)" }}
+            isConnectable={isConnectable}
+          />
+          <div
+            className={`absolute text-xs font-medium ${handle.color === "bg-green-500" ? "text-green-700" : "text-slate-700"} pointer-events-none`}
+            style={{
+              right: -150,
+              top: `${handle.offset}%`,
+              transform: "translateY(-50%)",
+              width: "140px",
+              textAlign: "left",
+              whiteSpace: "normal",
+              lineHeight: "1.2",
+            }}
+          >
+            {handle.label}
+          </div>
+        </React.Fragment>
+      ))}
     </div>
   )
 }
 
 export default React.memo(SendTextNode)
-
-// Re-export for backward compatibility
 export type { ChannelContent } from "@/lib/channel-types"
 export type { SendTextButton, ButtonsValueTarget } from "@/lib/button-types"

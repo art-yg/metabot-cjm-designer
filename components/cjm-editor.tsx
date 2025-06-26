@@ -87,6 +87,9 @@ export function CJMEditor({ editorState }: CJMEditorProps) {
     getExportJson,
   } = editorState
 
+  // Отладка mapSettings
+  console.log("CJMEditor mapSettings:", mapSettings)
+
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       <header className="p-3 bg-white border-b border-gray-200 flex justify-between items-center">
@@ -164,7 +167,12 @@ export function CJMEditor({ editorState }: CJMEditorProps) {
         </div>
 
         {selectedNode && (
-          <EditPanel node={selectedNode} onClose={() => setSelectedNode(null)} onUpdateData={onUpdateNodeData} />
+          <EditPanel
+            node={selectedNode}
+            onClose={() => setSelectedNode(null)}
+            onUpdateData={onUpdateNodeData}
+            mapSettings={mapSettings}
+          />
         )}
       </div>
 

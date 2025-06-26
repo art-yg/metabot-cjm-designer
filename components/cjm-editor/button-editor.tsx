@@ -70,7 +70,14 @@ function ButtonEditor({ buttons, onButtonsChange }: ButtonEditorProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <MousePointer size={16} className="mr-2 text-green-600" />
-          <Label className="text-sm font-medium text-gray-700">Кнопки ({buttons.length})</Label>
+          <Label className="text-sm font-medium text-gray-700">
+            Кнопки
+            {buttons.length > 0 && (
+              <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
+                {buttons.length}
+              </span>
+            )}
+          </Label>
         </div>
         <Button variant="outline" size="sm" onClick={addButton} className="h-8 text-xs">
           <PlusCircle size={14} className="mr-1.5" />

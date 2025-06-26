@@ -7,5 +7,6 @@ export function exportEntryPoint(node: Node<EntryPointNodeData>) {
   return {
     ...restData,
     coordinates: { x: Math.round(node.position.x), y: Math.round(node.position.y) },
+    // deep_links уже включены в restData, так как они часть EntryPointNodeData
   }
 }
