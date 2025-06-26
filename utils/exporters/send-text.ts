@@ -2,6 +2,7 @@ import type { Node } from "reactflow"
 import type { SendTextNodeData } from "@/components/cjm-editor/nodes/send-text-node"
 import type { Link } from "@/lib/link-types"
 import type { Trigger, TriggerActionBlock } from "@/lib/trigger-types"
+import type { CJMNode } from "@/app/cjm-editor/types"
 
 // Helper to convert camelCase to snake_case
 const toSnakeCase = (str: string): string => {
@@ -109,11 +110,17 @@ export function exportSendText(node: Node<SendTextNodeData>) {
 
   // Process buttons - remove client-side IDs
   if (processedData.buttons && processedData.buttons.length > 0) {
-    processedData.buttons = processedData.buttons.map(({ id, target_code, ...buttonData }: any) => {
-      const btn: any = { ...buttonData, next_step: target_code }
+    processedData.buttons = processedData.buttons.map(({ id, ...buttonData }: any) => {
+      const btn: any = { ...buttonData }
+      // Убираем пустые значения
       if (btn.value === "") {
         const { value, ...restBtn } = btn
-        return restBtn
+        Object.assign(btn, restBtn)
+      }
+      // Убираем пустые next_step
+      if (!btn.next_step) {
+        const { next_step, ...restBtn } = btn
+        Object.assign(btn, restBtn)
       }
       return btn
     })
@@ -172,4 +179,53 @@ export function exportSendText(node: Node<SendTextNodeData>) {
     ...finalData, // Contains all other fields like code, type, content, next_step etc.
     coordinates: { x: Math.round(node.position.x), y: Math.round(node.position.y) },
   }
+}
+
+export function exportSendTextNode(node: CJMNode): any {
+  const data = node.data as SendTextNodeData
+
+  const processedData: any = {
+    code: data.code,
+    label: data.label,
+    content: data.content,
+    type: "send_text",
+    next_step: data.next_step,
+  }
+
+  // Add optional fields only if they exist and have content
+  if (data.content_per_channel && Object.keys(data.content_per_channel).length > 0) {
+    processedData.content_per_channel = data.content_per_channel
+  }
+
+  if (data.buttons && data.buttons.length > 0) {
+    // Process buttons and ensure next_step is properly exported
+    processedData.buttons = data.buttons.map((button: any) => {
+      const btn: any = {
+        id: button.id,
+        title: button.title,
+        next_step: button.next_step, // Используем правильное поле
+      }
+
+      // Add value only if it's not empty
+      if (button.value && button.value.trim() !== "") {
+        btn.value = button.value
+      }
+
+      return btn
+    })
+  }
+
+  if (data.buttons_value_target && data.buttons_value_target.key) {
+    processedData.buttons_value_target = data.buttons_value_target
+  }
+
+  if (data.log_way_steps && data.log_way_steps.steps.length > 0) {
+    processedData.log_way_steps = data.log_way_steps
+  }
+
+  if (data.links && data.links.length > 0) {
+    processedData.links = data.links
+  }
+
+  return processedData
 }

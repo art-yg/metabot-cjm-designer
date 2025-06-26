@@ -3,10 +3,16 @@ import type { CJMNodeData } from "@/app/cjm-editor/page"
 import type { MapSettings } from "./map-settings"
 import { exportNode } from "@/utils/exporters"
 import { importNode } from "@/utils/importers"
+import { loadApiSettings } from "./api-settings"
 
 export function exportToJson(nodes: Node<CJMNodeData>[], edges: Edge[], mapSettings: MapSettings): string {
+  // Загружаем API настройки для получения формата и версии
+  const apiSettings = loadApiSettings()
+
   const payload = {
     script_request_params: {
+      format: apiSettings.format,
+      version: apiSettings.version,
       bot_id: mapSettings.bot_id,
       code: mapSettings.code,
       title: mapSettings.title,
@@ -22,6 +28,8 @@ export function importFromJson(jsonString: string): {
   nodes: Node<CJMNodeData>[]
   edges: Edge[]
   mapSettings?: MapSettings
+  format?: string
+  version?: string
 } {
   try {
     const parsed = JSON.parse(jsonString)
@@ -221,7 +229,13 @@ export function importFromJson(jsonString: string): {
       }
     })
 
-    return { nodes, edges, mapSettings }
+    return {
+      nodes,
+      edges,
+      mapSettings,
+      format: scriptParams.format,
+      version: scriptParams.version,
+    }
   } catch (error) {
     throw new Error(`Failed to parse JSON: ${error instanceof Error ? error.message : "Unknown error"}`)
   }

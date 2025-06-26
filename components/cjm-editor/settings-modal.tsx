@@ -5,12 +5,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { AlertTriangle, Save, Settings, Zap } from "lucide-react"
+import { AlertTriangle, Save, Settings, Zap, Link } from "lucide-react"
 import { toast } from "react-hot-toast"
 import type { MapSettings, ChannelSettings } from "@/lib/map-settings"
 import { validateMapSettings } from "@/lib/map-settings"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ChannelsSettingsTab from "./channels-settings-tab"
+import type { ApiSettings } from "@/lib/api-settings"
+import { loadApiSettings, saveApiSettings } from "@/lib/api-settings"
+import ApiSettingsTab from "./api-settings-tab"
 
 interface SettingsModalProps {
   isOpen: boolean
@@ -22,6 +25,7 @@ interface SettingsModalProps {
 function SettingsModal({ isOpen, onClose, settings, onSave }: SettingsModalProps) {
   const [localSettings, setLocalSettings] = useState<MapSettings>(settings)
   const [errors, setErrors] = useState<string[]>([])
+  const [apiSettings, setApiSettings] = useState<ApiSettings>(loadApiSettings())
 
   useEffect(() => {
     if (isOpen) {
@@ -36,6 +40,7 @@ function SettingsModal({ isOpen, onClose, settings, onSave }: SettingsModalProps
         },
       }
       setLocalSettings(settingsWithDefaults)
+      setApiSettings(loadApiSettings())
       setErrors([])
     }
   }, [isOpen, settings])
@@ -51,6 +56,7 @@ function SettingsModal({ isOpen, onClose, settings, onSave }: SettingsModalProps
 
     setErrors([])
     onSave(localSettings)
+    saveApiSettings(apiSettings) // Сохраняем API настройки отдельно
     toast.success("Настройки карты сохранены!")
     onClose()
   }
@@ -77,7 +83,7 @@ function SettingsModal({ isOpen, onClose, settings, onSave }: SettingsModalProps
         </DialogHeader>
 
         <Tabs defaultValue="general" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="general" className="flex items-center">
               <Settings size={16} className="mr-2" />
               Основные
@@ -85,6 +91,10 @@ function SettingsModal({ isOpen, onClose, settings, onSave }: SettingsModalProps
             <TabsTrigger value="channels" className="flex items-center">
               <Zap size={16} className="mr-2" />
               Каналы
+            </TabsTrigger>
+            <TabsTrigger value="api" className="flex items-center">
+              <Link size={16} className="mr-2" />
+              API
             </TabsTrigger>
           </TabsList>
 
@@ -174,6 +184,9 @@ function SettingsModal({ isOpen, onClose, settings, onSave }: SettingsModalProps
                 channels={localSettings.channels}
                 onUpdate={(channels) => handleFieldChange("channels", channels)}
               />
+            </TabsContent>
+            <TabsContent value="api" className="mt-0">
+              <ApiSettingsTab settings={apiSettings} onUpdate={setApiSettings} />
             </TabsContent>
           </div>
         </Tabs>

@@ -39,6 +39,10 @@ function SendTextEditor({ node, onUpdateData }: SendTextEditorProps) {
     onUpdateData(node.id, { content })
   }
 
+  const handleNextStepChange = (nextStep: string) => {
+    onUpdateData(node.id, { next_step: nextStep.trim() || null })
+  }
+
   const handleLinksChange = (updatedLinks: Link[]) => {
     onUpdateData(node.id, { links: updatedLinks.length > 0 ? updatedLinks : undefined })
   }
@@ -115,7 +119,24 @@ function SendTextEditor({ node, onUpdateData }: SendTextEditorProps) {
         </p>
       </div>
 
-      {/* 2. Channel Customization */}
+      {/* 2. Next Step Field */}
+      <div className="pt-4 border-t">
+        <label htmlFor="next-step" className="block text-sm font-medium text-gray-600 mb-1">
+          Следующий шаг (Next Step):
+        </label>
+        <Input
+          id="next-step"
+          value={data.next_step || ""}
+          onChange={(e) => handleNextStepChange(e.target.value)}
+          className="w-full"
+          placeholder="Код следующего шага (можно оставить пустым)"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Основной переход после отправки сообщения. Работает независимо от кнопок.
+        </p>
+      </div>
+
+      {/* 3. Channel Customization */}
       <div className="pt-4 border-t">
         <div className="flex items-center space-x-2 mb-3">
           <Switch id="customize-channels" checked={customizePerChannel} onCheckedChange={toggleCustomizePerChannel} />
@@ -152,7 +173,7 @@ function SendTextEditor({ node, onUpdateData }: SendTextEditorProps) {
         )}
       </div>
 
-      {/* 3. Buttons Section */}
+      {/* 4. Buttons Section */}
       <div className="pt-4 border-t">
         <ButtonEditor
           buttons={data.buttons || []}
@@ -161,7 +182,7 @@ function SendTextEditor({ node, onUpdateData }: SendTextEditorProps) {
           }}
         />
 
-        {/* 4. Button Values Section - показывается только если есть кнопки */}
+        {/* 5. Button Values Section - показывается только если есть кнопки */}
         {hasButtons && (
           <div className="mt-4">
             <div className="flex items-center space-x-2 mb-3">
@@ -227,7 +248,7 @@ function SendTextEditor({ node, onUpdateData }: SendTextEditorProps) {
         )}
       </div>
 
-      {/* 5. Links Section */}
+      {/* 6. Links Section */}
       <div className="pt-4 border-t">
         <LinkSection links={data.links || []} onChange={handleLinksChange} parentStepCode={data.code} />
       </div>

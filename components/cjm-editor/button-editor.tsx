@@ -3,10 +3,10 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { PlusCircle, Trash2, MousePointer, ChevronUp, ChevronDown } from "lucide-react"
+import { Plus, Trash2, GripVertical } from "lucide-react"
 import { v4 as uuidv4 } from "uuid"
 import type { SendTextButton } from "@/lib/button-types"
 
@@ -22,216 +22,177 @@ function ButtonEditor({ buttons, onButtonsChange }: ButtonEditorProps) {
     const newButton: SendTextButton = {
       id: uuidv4(),
       title: "",
-      next_step: null, // было: target_code: null
+      next_step: null,
       row: 1,
       input_code: "",
       js_condition: "",
-      value: "", // Новое поле
+      value: "",
     }
     const updatedButtons = [...buttons, newButton]
     onButtonsChange(updatedButtons)
-
-    // Auto-open the new button for editing
-    setOpenItems([...openItems, `button-${newButton.id}`])
+    setOpenItems([...openItems, newButton.id])
   }
 
-  const updateButton = (index: number, field: keyof SendTextButton, value: string | number | null) => {
-    const updatedButtons = [...buttons]
-    updatedButtons[index] = {
-      ...updatedButtons[index],
-      [field]: value,
-    }
+  const updateButton = (id: string, updates: Partial<SendTextButton>) => {
+    const updatedButtons = buttons.map((button) => (button.id === id ? { ...button, ...updates } : button))
     onButtonsChange(updatedButtons)
   }
 
-  const removeButton = (index: number) => {
-    const updatedButtons = buttons.filter((_, i) => i !== index)
+  const removeButton = (id: string) => {
+    const updatedButtons = buttons.filter((button) => button.id !== id)
     onButtonsChange(updatedButtons)
+    setOpenItems(openItems.filter((item) => item !== id))
   }
 
-  const moveButton = (index: number, direction: "up" | "down") => {
-    if ((direction === "up" && index === 0) || (direction === "down" && index === buttons.length - 1)) {
-      return
-    }
-
+  const moveButton = (fromIndex: number, toIndex: number) => {
     const updatedButtons = [...buttons]
-    const targetIndex = direction === "up" ? index - 1 : index + 1
-
-    // Swap buttons
-    const temp = updatedButtons[index]
-    updatedButtons[index] = updatedButtons[targetIndex]
-    updatedButtons[targetIndex] = temp
-
+    const [movedButton] = updatedButtons.splice(fromIndex, 1)
+    updatedButtons.splice(toIndex, 0, movedButton)
     onButtonsChange(updatedButtons)
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <MousePointer size={16} className="mr-2 text-green-600" />
-          <Label className="text-sm font-medium text-gray-700">
-            Кнопки
-            {buttons.length > 0 && (
-              <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
-                {buttons.length}
-              </span>
-            )}
-          </Label>
-        </div>
-        <Button variant="outline" size="sm" onClick={addButton} className="h-8 text-xs">
-          <PlusCircle size={14} className="mr-1.5" />
+        <Label className="text-sm font-medium text-gray-700">Кнопки</Label>
+        <Button onClick={addButton} size="sm" variant="outline" className="h-8 bg-transparent">
+          <Plus size={14} className="mr-1" />
           Добавить кнопку
         </Button>
       </div>
 
-      {buttons.length === 0 ? (
-        <div className="text-center p-4 border border-dashed border-gray-300 rounded-md">
-          <MousePointer size={24} className="mx-auto text-gray-400 mb-2" />
-          <p className="text-sm text-gray-500">Нет кнопок. Будет использован стандартный переход next_step.</p>
-        </div>
-      ) : (
+      {buttons.length > 0 && (
         <Accordion type="multiple" value={openItems} onValueChange={setOpenItems} className="w-full">
           {buttons.map((button, index) => (
-            <AccordionItem
-              value={`button-${button.id}`}
-              key={button.id}
-              className="border border-green-200 rounded-md mb-2"
-            >
-              <AccordionTrigger className="text-xs py-2 px-3 hover:no-underline bg-green-50 rounded-t-md">
+            <AccordionItem value={button.id} key={button.id} className="border rounded-md">
+              <AccordionTrigger className="px-3 py-2 hover:no-underline">
                 <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center">
-                    <span className="font-medium">
-                      {index + 1}. {button.title || "Без названия"}
+                  <div className="flex items-center space-x-2">
+                    <GripVertical size={14} className="text-gray-400" />
+                    <span className="text-sm font-medium">
+                      {index + 1}. {button.title || "Новая кнопка"}
+                      {button.input_code && (
+                        <span className="font-mono text-xs ml-2 text-gray-600">[{button.input_code}]</span>
+                      )}
                     </span>
-                    {button.next_step && <span className="ml-2 text-green-600 text-xs">→ {button.next_step}</span>}
-                    {button.value && <span className="ml-2 text-purple-600 text-xs">= {button.value}</span>}
                   </div>
-                  <div className="flex items-center space-x-1 mr-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        moveButton(index, "up")
-                      }}
-                      disabled={index === 0}
-                      className="h-6 w-6"
-                    >
-                      <ChevronUp size={12} />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        moveButton(index, "down")
-                      }}
-                      disabled={index === buttons.length - 1}
-                      className="h-6 w-6"
-                    >
-                      <ChevronDown size={12} />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        removeButton(index)
-                      }}
-                      className="h-6 w-6 text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 size={12} />
-                    </Button>
-                  </div>
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      removeButton(button.id)
+                    }}
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 size={12} />
+                  </Button>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-3 pb-3">
                 <div className="space-y-3">
+                  {/* Название кнопки */}
                   <div>
-                    <Label htmlFor={`title-${button.id}`} className="text-xs font-medium text-gray-600">
+                    <Label htmlFor={`button-title-${button.id}`} className="text-sm font-medium text-gray-600 mb-1">
                       Название кнопки <span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id={`title-${button.id}`}
+                      id={`button-title-${button.id}`}
                       value={button.title}
-                      onChange={(e) => updateButton(index, "title", e.target.value)}
-                      className="h-8 text-xs mt-1"
-                      placeholder="Например: Подробнее"
+                      onChange={(e) => updateButton(button.id, { title: e.target.value })}
+                      placeholder="Введите название кнопки"
+                      className="w-full"
                     />
                   </div>
 
+                  {/* Переход к шагу */}
                   <div>
-                    <Label htmlFor={`next_step-${button.id}`} className="text-xs font-medium text-gray-600">
+                    <Label htmlFor={`button-next-step-${button.id}`} className="text-sm font-medium text-gray-600 mb-1">
                       Переход к шагу <span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id={`next_step-${button.id}`}
+                      id={`button-next-step-${button.id}`}
                       value={button.next_step || ""}
-                      onChange={(e) => updateButton(index, "next_step", e.target.value || null)}
-                      className="h-8 text-xs mt-1"
-                      placeholder="Код шага для перехода"
+                      onChange={(e) => updateButton(button.id, { next_step: e.target.value.trim() || null })}
+                      placeholder="Код следующего шага"
+                      className="w-full"
                     />
                   </div>
 
+                  {/* Код ввода */}
                   <div>
-                    <Label htmlFor={`value-${button.id}`} className="text-xs font-medium text-gray-600">
-                      Значение для записи в атрибут
+                    <Label
+                      htmlFor={`button-input-code-${button.id}`}
+                      className="text-sm font-medium text-gray-600 mb-1"
+                    >
+                      Код ввода <span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id={`value-${button.id}`}
-                      value={button.value || ""}
-                      onChange={(e) => updateButton(index, "value", e.target.value)}
-                      className="h-8 text-xs mt-1"
-                      placeholder="Например: yes, option_1, premium"
+                      id={`button-input-code-${button.id}`}
+                      value={button.input_code}
+                      onChange={(e) => updateButton(button.id, { input_code: e.target.value })}
+                      placeholder="Введите код для кнопки"
+                      className="w-full font-mono"
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Значение, которое будет записано в атрибут при нажатии на кнопку
+                      Код, который будет отправлен при нажатии кнопки (например: 1, A, yes)
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label htmlFor={`row-${button.id}`} className="text-xs font-medium text-gray-600">
-                        Строка
-                      </Label>
-                      <Input
-                        id={`row-${button.id}`}
-                        type="number"
-                        min="1"
-                        value={button.row}
-                        onChange={(e) => updateButton(index, "row", Number.parseInt(e.target.value) || 1)}
-                        className="h-8 text-xs mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor={`input-${button.id}`} className="text-xs font-medium text-gray-600">
-                        Код ввода
-                      </Label>
-                      <Input
-                        id={`input-${button.id}`}
-                        value={button.input_code}
-                        onChange={(e) => updateButton(index, "input_code", e.target.value)}
-                        className="h-8 text-xs mt-1"
-                        placeholder="1"
-                        maxLength={10}
-                      />
-                    </div>
+                  {/* Строка */}
+                  <div>
+                    <Label htmlFor={`button-row-${button.id}`} className="text-sm font-medium text-gray-600 mb-1">
+                      Строка
+                    </Label>
+                    <Input
+                      id={`button-row-${button.id}`}
+                      type="number"
+                      value={button.row || ""}
+                      onChange={(e) =>
+                        updateButton(button.id, { row: e.target.value ? Number.parseInt(e.target.value) : 1 })
+                      }
+                      placeholder="По умолчанию: 1"
+                      className="w-full"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Номер строки для расположения кнопки. Можно оставить пустым.
+                    </p>
                   </div>
 
+                  {/* Значение для записи */}
                   <div>
-                    <Label htmlFor={`condition-${button.id}`} className="text-xs font-medium text-gray-600">
-                      Условие показа (JavaScript)
+                    <Label htmlFor={`button-value-${button.id}`} className="text-sm font-medium text-gray-600 mb-1">
+                      Значение для записи
+                    </Label>
+                    <Input
+                      id={`button-value-${button.id}`}
+                      value={button.value || ""}
+                      onChange={(e) => updateButton(button.id, { value: e.target.value })}
+                      placeholder="Значение для записи в атрибут (опционально)"
+                      className="w-full"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Значение, которое будет записано в атрибут при выборе кнопки
+                    </p>
+                  </div>
+
+                  {/* JS условие */}
+                  <div>
+                    <Label
+                      htmlFor={`button-js-condition-${button.id}`}
+                      className="text-sm font-medium text-gray-600 mb-1"
+                    >
+                      JS условие
                     </Label>
                     <Textarea
-                      id={`condition-${button.id}`}
+                      id={`button-js-condition-${button.id}`}
                       value={button.js_condition}
-                      onChange={(e) => updateButton(index, "js_condition", e.target.value)}
+                      onChange={(e) => updateButton(button.id, { js_condition: e.target.value })}
+                      placeholder="return true; // Условие показа кнопки"
+                      className="w-full font-mono text-sm"
                       rows={2}
-                      className="text-xs mt-1 custom-scrollbar"
-                      placeholder="return lead.getAttr('user_role') == 'admin'"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Оставьте пустым для показа всегда</p>
+                    <p className="text-xs text-gray-500 mt-1">JavaScript код для условного показа кнопки</p>
                   </div>
                 </div>
               </AccordionContent>
@@ -240,14 +201,16 @@ function ButtonEditor({ buttons, onButtonsChange }: ButtonEditorProps) {
         </Accordion>
       )}
 
-      {buttons.length > 0 && (
-        <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-          <p className="text-xs text-green-700">
-            <strong>Кнопки активны:</strong> будут созданы выходы для каждой кнопки с заполненным названием и переходом.
-            Стандартный выход next_step будет скрыт.
-          </p>
+      {buttons.length === 0 && (
+        <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-200 rounded-lg">
+          <p className="text-sm">Кнопки не добавлены</p>
+          <p className="text-xs mt-1">Нажмите "Добавить кнопку" чтобы создать интерактивные элементы</p>
         </div>
       )}
+
+      <p className="text-xs text-gray-500">
+        Кнопки позволяют пользователям выбирать варианты ответов. Каждая кнопка может вести к разным шагам сценария.
+      </p>
     </div>
   )
 }

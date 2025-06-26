@@ -35,6 +35,9 @@ function SendTextNode({ data, selected, id, isConnectable }: NodeProps<SendTextN
 
   const validButtons = hasButtons ? data.buttons!.filter((btn) => btn.title.trim() && btn.next_step?.trim()) : []
 
+  // НОВАЯ ЛОГИКА: основной выход показываем ВСЕГДА (независимо от кнопок)
+  const showMainOutput = true
+
   const getButtonHandlePositions = () => {
     if (validButtons.length === 0) return []
     const positions: { id: string; position: Position; offset: number; label: string }[] = []
@@ -265,15 +268,22 @@ function SendTextNode({ data, selected, id, isConnectable }: NodeProps<SendTextN
         </div>
       </NodeBase>
 
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        id="next_step"
-        className="!w-3 !h-3 !bg-orange-500"
-        style={{ bottom: -6, left: "50%", transform: "translateX(-50%)" }}
-        isConnectable={isConnectable}
-      />
+      {/* Входящий handle */}
+      <Handle type="target" position={Position.Left} className="w-3 h-3 bg-green-500 border-2 border-white" />
 
+      {/* Основной выход - показываем ВСЕГДА */}
+      {showMainOutput && (
+        <Handle
+          type="source"
+          position={Position.Bottom}
+          id="next_step"
+          className="!w-3 !h-3 !bg-orange-500"
+          style={{ bottom: -6, left: "50%", transform: "translateX(-50%)" }}
+          isConnectable={isConnectable}
+        />
+      )}
+
+      {/* Выходы для кнопок */}
       {buttonHandlePositions.map((handle) => (
         <React.Fragment key={handle.id}>
           <Handle
@@ -305,6 +315,7 @@ function SendTextNode({ data, selected, id, isConnectable }: NodeProps<SendTextN
         </React.Fragment>
       ))}
 
+      {/* Выходы для триггеров ссылок */}
       {triggerHandlePositions.map((handle) => (
         <React.Fragment key={handle.id}>
           <Handle

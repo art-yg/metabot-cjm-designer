@@ -33,7 +33,172 @@ export function useCJMEditor() {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const { fitView, screenToFlowPosition, deleteElements } = useReactFlow()
 
-  // Helper function to create trigger edges for send_text nodes
+  // Helper function to create all edges from node data
+  const createEdgesFromNodes = useCallback((nodes: CJMNode[]): Edge[] => {
+    const allEdges: Edge[] = []
+
+    nodes.forEach((node) => {
+      const nodeData = node.data
+
+      // Handle basic next_step for all node types
+      if (nodeData.next_step) {
+        const targetExists = nodes.some((n) => n.id === nodeData.next_step)
+        if (targetExists) {
+          allEdges.push({
+            id: `${node.id}-next_step`,
+            source: node.id,
+            target: nodeData.next_step,
+            sourceHandle: "next_step",
+            type: "smoothstep",
+            animated: true,
+          })
+        }
+      }
+
+      // Handle else_step for if-else nodes
+      if (nodeData.type === "if_else" && (nodeData as any).else_step) {
+        const targetExists = nodes.some((n) => n.id === (nodeData as any).else_step)
+        if (targetExists) {
+          allEdges.push({
+            id: `${node.id}-else_step`,
+            source: node.id,
+            target: (nodeData as any).else_step,
+            sourceHandle: "else_step",
+            type: "smoothstep",
+            animated: true,
+          })
+        }
+      }
+
+      // Handle default_step for switch nodes
+      if (nodeData.type === "switch" && (nodeData as any).default_step) {
+        const targetExists = nodes.some((n) => n.id === (nodeData as any).default_step)
+        if (targetExists) {
+          allEdges.push({
+            id: `${node.id}-default_step`,
+            source: node.id,
+            target: (nodeData as any).default_step,
+            sourceHandle: "default_step",
+            type: "smoothstep",
+            animated: true,
+          })
+        }
+      }
+
+      // Handle exit_step for various nodes
+      if ((nodeData as any).exit_step) {
+        const targetExists = nodes.some((n) => n.id === (nodeData as any).exit_step)
+        if (targetExists) {
+          allEdges.push({
+            id: `${node.id}-exit_step`,
+            source: node.id,
+            target: (nodeData as any).exit_step,
+            sourceHandle: "exit_step",
+            type: "smoothstep",
+            animated: true,
+          })
+        }
+      }
+
+      // Handle timeout exit_step for wait nodes
+      if (nodeData.type === "wait" && (nodeData as any).timeout?.exit_step) {
+        const targetExists = nodes.some((n) => n.id === (nodeData as any).timeout.exit_step)
+        if (targetExists) {
+          allEdges.push({
+            id: `${node.id}-timeout_step`,
+            source: node.id,
+            target: (nodeData as any).timeout.exit_step,
+            sourceHandle: "timeout_step",
+            type: "smoothstep",
+            animated: true,
+          })
+        }
+      }
+
+      // Handle buttons for send_text nodes
+      if (nodeData.type === "send_text" && (nodeData as SendTextNodeData).buttons) {
+        const sendTextData = nodeData as SendTextNodeData
+        sendTextData.buttons?.forEach((button) => {
+          if (button.next_step) {
+            const targetExists = nodes.some((n) => n.id === button.next_step)
+            if (targetExists) {
+              allEdges.push({
+                id: `${node.id}-button-${button.id}`,
+                source: node.id,
+                target: button.next_step,
+                sourceHandle: `button_${button.id}`,
+                type: "smoothstep",
+                animated: true,
+              })
+            }
+          }
+        })
+      }
+
+      // Handle cases for switch nodes
+      if (nodeData.type === "switch" && (nodeData as any).cases) {
+        ;(nodeData as any).cases.forEach((switchCase: any) => {
+          if (switchCase.next_step) {
+            const targetExists = nodes.some((n) => n.id === switchCase.next_step)
+            if (targetExists) {
+              allEdges.push({
+                id: `${node.id}-case-${switchCase.id}`,
+                source: node.id,
+                target: switchCase.next_step,
+                sourceHandle: `case_${switchCase.id}`,
+                type: "smoothstep",
+                animated: true,
+              })
+            }
+          }
+        })
+      }
+
+      // Handle trigger edges for send_text nodes
+      if (nodeData.type === "send_text" && (nodeData as SendTextNodeData).links) {
+        const sendTextData = nodeData as SendTextNodeData
+        sendTextData.links?.forEach((link) => {
+          link.triggers?.forEach((trigger) => {
+            if (trigger.active) {
+              // Create edge for on_true next_step
+              if (trigger.on_true?.next_step) {
+                const targetExists = nodes.some((n) => n.id === trigger.on_true!.next_step)
+                if (targetExists) {
+                  allEdges.push({
+                    id: `${node.id}-trigger-${trigger.id}-true`,
+                    source: node.id,
+                    target: trigger.on_true.next_step,
+                    sourceHandle: `${trigger.id}_true`,
+                    type: "smoothstep",
+                    animated: true,
+                  })
+                }
+              }
+
+              // Create edge for on_false next_step
+              if (trigger.on_false?.next_step) {
+                const targetExists = nodes.some((n) => n.id === trigger.on_false!.next_step)
+                if (targetExists) {
+                  allEdges.push({
+                    id: `${node.id}-trigger-${trigger.id}-false`,
+                    source: node.id,
+                    target: trigger.on_false.next_step,
+                    sourceHandle: `${trigger.id}_false`,
+                    type: "smoothstep",
+                    animated: true,
+                  })
+                }
+              }
+            }
+          })
+        })
+      }
+    })
+
+    return allEdges
+  }, [])
+
+  // Helper function to create trigger edges for send_text nodes (legacy compatibility)
   const createTriggerEdges = useCallback((nodes: CJMNode[]): Edge[] => {
     const triggerEdges: Edge[] = []
 
@@ -93,21 +258,9 @@ export function useCJMEditor() {
           return n
         })
 
-        // Update trigger edges when node data changes
-        if (affectedNode && affectedNode.data.type === "send_text") {
-          const newTriggerEdges = createTriggerEdges(updatedNodes)
-          setEdges((currentEdges) => {
-            // Remove existing trigger edges for this node
-            const filteredEdges = currentEdges.filter(
-              (edge) =>
-                !(
-                  edge.source === nodeId &&
-                  (edge.sourceHandle?.endsWith("_true") || edge.sourceHandle?.endsWith("_false"))
-                ),
-            )
-            return [...filteredEdges, ...newTriggerEdges.filter((edge) => edge.source === nodeId)]
-          })
-        }
+        // Update ALL edges when node data changes
+        const newEdges = createEdgesFromNodes(updatedNodes)
+        setEdges(newEdges)
 
         return updatedNodes
       })
@@ -116,7 +269,7 @@ export function useCJMEditor() {
         setSelectedNode(affectedNode)
       }
     },
-    [setNodes, selectedNode, createTriggerEdges, setEdges],
+    [setNodes, selectedNode, createEdgesFromNodes, setEdges],
   )
 
   // Node changes handler
@@ -340,9 +493,8 @@ export function useCJMEditor() {
             mapSettings: importedSettings,
           } = cjmOperations.importFromJson(jsonString)
 
-          // Create trigger edges for imported nodes
-          const triggerEdges = createTriggerEdges(importedNodes)
-          const allEdges = [...importedEdges, ...triggerEdges]
+          // Create all edges for imported nodes
+          const allEdges = createEdgesFromNodes(importedNodes)
 
           setNodes(importedNodes)
           setEdges(allEdges)
@@ -360,7 +512,7 @@ export function useCJMEditor() {
           toast.error((error as Error).message || "Import failed")
         }
       },
-      [setNodes, setEdges, fitView, setMapSettings, createTriggerEdges],
+      [setNodes, setEdges, fitView, setMapSettings, createEdgesFromNodes],
     ),
 
     saveDraft: useCallback(() => {
@@ -370,9 +522,8 @@ export function useCJMEditor() {
     loadDraft: useCallback(() => {
       const draft = cjmOperations.loadDraft()
       if (draft) {
-        // Create trigger edges for loaded nodes
-        const triggerEdges = createTriggerEdges(draft.nodes)
-        const allEdges = [...draft.edges, ...triggerEdges]
+        // Create all edges for loaded nodes
+        const allEdges = createEdgesFromNodes(draft.nodes)
 
         setNodes(draft.nodes)
         setEdges(allEdges)
@@ -389,7 +540,7 @@ export function useCJMEditor() {
       } else {
         toast("No draft found to load.")
       }
-    }, [setNodes, setEdges, fitView, setMapSettings, createTriggerEdges]),
+    }, [setNodes, setEdges, fitView, setMapSettings, createEdgesFromNodes]),
   }
 
   useEffect(() => {
