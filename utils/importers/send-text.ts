@@ -79,6 +79,8 @@ export function importSendText(step: any): Node<SendTextNodeData> {
     input_code: btn.input_code || "",
     js_condition: btn.js_condition || "",
     value: btn.value || "",
+    add_tags: btn.add_tags || [],
+    remove_tags: btn.remove_tags || [],
   }))
 
   let importedLogWaySteps = step.log_way_steps

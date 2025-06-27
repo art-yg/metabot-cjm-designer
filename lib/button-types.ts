@@ -6,6 +6,8 @@ export interface SendTextButton {
   input_code: string
   js_condition: string
   value?: string // Новое опциональное поле - значение для записи в атрибут
+  add_tags?: string[] // Теги для добавления
+  remove_tags?: string[] // Теги для удаления
 }
 
 // Новый тип для настройки записи значений

@@ -108,7 +108,7 @@ export function exportSendText(node: Node<SendTextNodeData>) {
     processedData.content_per_channel = undefined
   }
 
-  // Process buttons - remove client-side IDs
+  // Process buttons - remove client-side IDs and clean up empty arrays
   if (processedData.buttons && processedData.buttons.length > 0) {
     processedData.buttons = processedData.buttons.map(({ id, ...buttonData }: any) => {
       const btn: any = { ...buttonData }
@@ -120,6 +120,15 @@ export function exportSendText(node: Node<SendTextNodeData>) {
       // Убираем пустые next_step
       if (!btn.next_step) {
         const { next_step, ...restBtn } = btn
+        Object.assign(btn, restBtn)
+      }
+      // Убираем пустые массивы тегов
+      if (btn.add_tags && btn.add_tags.length === 0) {
+        const { add_tags, ...restBtn } = btn
+        Object.assign(btn, restBtn)
+      }
+      if (btn.remove_tags && btn.remove_tags.length === 0) {
+        const { remove_tags, ...restBtn } = btn
         Object.assign(btn, restBtn)
       }
       return btn
@@ -209,6 +218,14 @@ export function exportSendTextNode(node: CJMNode): any {
       // Add value only if it's not empty
       if (button.value && button.value.trim() !== "") {
         btn.value = button.value
+      }
+
+      // Add tags only if they're not empty
+      if (button.add_tags && button.add_tags.length > 0) {
+        btn.add_tags = button.add_tags
+      }
+      if (button.remove_tags && button.remove_tags.length > 0) {
+        btn.remove_tags = button.remove_tags
       }
 
       return btn

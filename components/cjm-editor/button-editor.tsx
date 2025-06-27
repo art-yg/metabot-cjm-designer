@@ -9,6 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Plus, Trash2, GripVertical } from "lucide-react"
 import { v4 as uuidv4 } from "uuid"
 import type { SendTextButton } from "@/lib/button-types"
+import TagsInput from "./tags-input"
 
 interface ButtonEditorProps {
   buttons: SendTextButton[]
@@ -27,6 +28,8 @@ function ButtonEditor({ buttons, onButtonsChange }: ButtonEditorProps) {
       input_code: "",
       js_condition: "",
       value: "",
+      add_tags: [],
+      remove_tags: [],
     }
     const updatedButtons = [...buttons, newButton]
     onButtonsChange(updatedButtons)
@@ -73,6 +76,12 @@ function ButtonEditor({ buttons, onButtonsChange }: ButtonEditorProps) {
                       {index + 1}. {button.title || "Новая кнопка"}
                       {button.input_code && (
                         <span className="font-mono text-xs ml-2 text-gray-600">[{button.input_code}]</span>
+                      )}
+                      {((button.add_tags && button.add_tags.length > 0) ||
+                        (button.remove_tags && button.remove_tags.length > 0)) && (
+                        <span className="text-xs ml-2 text-purple-600">
+                          [+{button.add_tags?.length || 0} -{button.remove_tags?.length || 0} tags]
+                        </span>
                       )}
                     </span>
                   </div>
@@ -146,11 +155,13 @@ function ButtonEditor({ buttons, onButtonsChange }: ButtonEditorProps) {
                     </Label>
                     <Input
                       id={`button-row-${button.id}`}
-                      type="number"
                       value={button.row || ""}
-                      onChange={(e) =>
-                        updateButton(button.id, { row: e.target.value ? Number.parseInt(e.target.value) : 1 })
-                      }
+                      onChange={(e) => {
+                        const value = e.target.value.trim()
+                        updateButton(button.id, {
+                          row: value === "" ? undefined : Number.parseInt(value) || 1,
+                        })
+                      }}
                       placeholder="По умолчанию: 1"
                       className="w-full"
                     />
@@ -193,6 +204,30 @@ function ButtonEditor({ buttons, onButtonsChange }: ButtonEditorProps) {
                       rows={2}
                     />
                     <p className="text-xs text-gray-500 mt-1">JavaScript код для условного показа кнопки</p>
+                  </div>
+
+                  {/* Добавить теги */}
+                  <div>
+                    <Label className="text-sm font-medium text-gray-600 mb-1">Добавить теги</Label>
+                    <TagsInput
+                      tags={button.add_tags || []}
+                      onChange={(tags) => updateButton(button.id, { add_tags: tags })}
+                      placeholder="Введите теги для добавления"
+                      variant="add"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Теги, которые будут добавлены при нажатии кнопки</p>
+                  </div>
+
+                  {/* Удалить теги */}
+                  <div>
+                    <Label className="text-sm font-medium text-gray-600 mb-1">Удалить теги</Label>
+                    <TagsInput
+                      tags={button.remove_tags || []}
+                      onChange={(tags) => updateButton(button.id, { remove_tags: tags })}
+                      placeholder="Введите теги для удаления"
+                      variant="remove"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Теги, которые будут удалены при нажатии кнопки</p>
                   </div>
                 </div>
               </AccordionContent>

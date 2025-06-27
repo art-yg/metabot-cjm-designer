@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Handle, Position, type NodeProps } from "reactflow"
-import { MessageSquare, Layers, MousePointer, BarChart3, LinkIcon } from "lucide-react"
+import { MessageSquare, Layers, MousePointer, BarChart3, LinkIcon, Tags } from "lucide-react"
 import NodeBase from "./node-base"
 import type { ChannelOverrides } from "@/lib/channel-types"
 import type { SendTextButton, ButtonsValueTarget } from "@/lib/button-types"
@@ -31,6 +31,12 @@ function SendTextNode({ data, selected, id, isConnectable }: NodeProps<SendTextN
     data.links &&
     data.links.some(
       (link) => link.triggers && link.triggers.some((t) => t.active && (t.on_true?.next_step || t.on_false?.next_step)),
+    )
+
+  const hasButtonTags =
+    hasButtons &&
+    data.buttons!.some(
+      (btn) => (btn.add_tags && btn.add_tags.length > 0) || (btn.remove_tags && btn.remove_tags.length > 0),
     )
 
   const validButtons = hasButtons ? data.buttons!.filter((btn) => btn.title.trim() && btn.next_step?.trim()) : []
@@ -113,6 +119,7 @@ function SendTextNode({ data, selected, id, isConnectable }: NodeProps<SendTextN
             {hasValueTarget && (
               <div className="w-2 h-2 bg-purple-500 rounded-full ml-1" title="Records button values to attribute" />
             )}
+            {hasButtonTags && <Tags size={14} className="text-orange-500 ml-1" title="Has button tag operations" />}
             {hasAnalytics && (
               <BarChart3
                 size={14}
@@ -150,6 +157,18 @@ function SendTextNode({ data, selected, id, isConnectable }: NodeProps<SendTextN
                     <span className="font-medium text-green-800">
                       {index + 1}. {button.title || "Без названия"}
                     </span>
+                    {((button.add_tags && button.add_tags.length > 0) ||
+                      (button.remove_tags && button.remove_tags.length > 0)) && (
+                      <div className="text-xs text-orange-600 mt-1 flex items-center">
+                        <Tags size={10} className="mr-1" />
+                        {button.add_tags && button.add_tags.length > 0 && (
+                          <span className="mr-2">+{button.add_tags.length}</span>
+                        )}
+                        {button.remove_tags && button.remove_tags.length > 0 && (
+                          <span>-{button.remove_tags.length}</span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
