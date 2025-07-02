@@ -19,12 +19,13 @@ interface EditorFactoryProps {
   onClose: () => void
   onUpdateData: (nodeId: string, newData: any) => void
   mapSettings: MapSettings
+  checkCodeUniqueness?: (code: string, currentNodeId: string) => boolean
 }
 
 // Типы команд с аналитикой (точки выполнения действий)
 const ANALYTICS_ENABLED_TYPES = ["send_text", "value_input", "add_tags", "remove_tags", "set_custom_field"] as const
 
-function EditorFactory({ node, onClose, onUpdateData, mapSettings }: EditorFactoryProps) {
+function EditorFactory({ node, onClose, onUpdateData, mapSettings, checkCodeUniqueness }: EditorFactoryProps) {
   const nodeType = node.data.type
   const withAnalytics = ANALYTICS_ENABLED_TYPES.includes(nodeType as any)
 
@@ -61,7 +62,13 @@ function EditorFactory({ node, onClose, onUpdateData, mapSettings }: EditorFacto
   }
 
   return (
-    <BaseEditor node={node} onClose={onClose} onUpdateData={onUpdateData} withAnalytics={withAnalytics}>
+    <BaseEditor
+      node={node}
+      onClose={onClose}
+      onUpdateData={onUpdateData}
+      withAnalytics={withAnalytics}
+      checkCodeUniqueness={checkCodeUniqueness}
+    >
       {renderEditor()}
     </BaseEditor>
   )

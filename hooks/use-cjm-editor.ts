@@ -246,6 +246,14 @@ export function useCJMEditor() {
     return triggerEdges
   }, [])
 
+  // Функция проверки уникальности кода
+  const checkCodeUniqueness = useCallback(
+    (code: string, currentNodeId: string) => {
+      return !nodes.some((node) => node.data.code === code && node.id !== currentNodeId)
+    },
+    [nodes],
+  )
+
   const updateNodeAndConnections = useCallback(
     (nodeId: string, updateFn: (nodeData: CJMNodeData) => CJMNodeData) => {
       let affectedNode: CJMNode | undefined
@@ -462,9 +470,122 @@ export function useCJMEditor() {
 
   const onUpdateNodeData = useCallback(
     (nodeId: string, newData: Partial<CJMNodeData>) => {
-      updateNodeAndConnections(nodeId, (currentData) => ({ ...currentData, ...newData }))
+      // Если изменяется код, нужно обновить ID узла и все связи
+      if (newData.code && newData.code !== nodes.find((n) => n.id === nodeId)?.data.code) {
+        const oldCode = nodes.find((n) => n.id === nodeId)?.data.code
+        const newCode = newData.code
+
+        // Проверить уникальность
+        if (!checkCodeUniqueness(newCode, nodeId)) {
+          toast.error("Код должен быть уникальным")
+          return
+        }
+
+        // Обновить узел с новым кодом и ID
+        setNodes((nds) =>
+          nds.map((node) => {
+            if (node.id === nodeId) {
+              return {
+                ...node,
+                id: newCode,
+                data: { ...node.data, ...newData },
+              }
+            }
+            return node
+          }),
+        )
+
+        // Обновить все ссылки на старый код в других узлах
+        setNodes((nds) =>
+          nds.map((node) => {
+            if (node.id === newCode) return node // Пропускаем обновленный узел
+
+            const updatedData = { ...node.data }
+
+            // Обновить next_step
+            if (updatedData.next_step === oldCode) {
+              updatedData.next_step = newCode
+            }
+
+            // Обновить else_step для if-else узлов
+            if ((updatedData as any).else_step === oldCode) {
+              ;(updatedData as any).else_step = newCode
+            }
+
+            // Обновить default_step для switch узлов
+            if ((updatedData as any).default_step === oldCode) {
+              ;(updatedData as any).default_step = newCode
+            }
+
+            // Обновить exit_step
+            if ((updatedData as any).exit_step === oldCode) {
+              ;(updatedData as any).exit_step = newCode
+            }
+
+            // Обновить timeout.exit_step для wait узлов
+            if ((updatedData as any).timeout?.exit_step === oldCode) {
+              ;(updatedData as any).timeout.exit_step = newCode
+            }
+
+            // Обновить кнопки для send_text узлов
+            if (updatedData.type === "send_text" && (updatedData as SendTextNodeData).buttons) {
+              ;(updatedData as SendTextNodeData).buttons = ((updatedData as SendTextNodeData).buttons || []).map(
+                (btn) => (btn.next_step === oldCode ? { ...btn, next_step: newCode } : btn),
+              )
+            }
+
+            // Обновить cases для switch узлов
+            if (updatedData.type === "switch" && (updatedData as any).cases) {
+              ;(updatedData as any).cases = ((updatedData as any).cases || []).map((c: any) =>
+                c.next_step === oldCode ? { ...c, next_step: newCode } : c,
+              )
+            }
+
+            // Обновить triggers для send_text узлов
+            if (updatedData.type === "send_text" && (updatedData as SendTextNodeData).links) {
+              ;(updatedData as SendTextNodeData).links = ((updatedData as SendTextNodeData).links || []).map(
+                (link) => ({
+                  ...link,
+                  triggers: (link.triggers || []).map((trigger) => ({
+                    ...trigger,
+                    on_true:
+                      trigger.on_true?.next_step === oldCode
+                        ? { ...trigger.on_true, next_step: newCode }
+                        : trigger.on_true,
+                    on_false:
+                      trigger.on_false?.next_step === oldCode
+                        ? { ...trigger.on_false, next_step: newCode }
+                        : trigger.on_false,
+                  })),
+                }),
+              )
+            }
+
+            return { ...node, data: updatedData }
+          }),
+        )
+
+        // Обновить edges
+        setEdges((eds) =>
+          eds.map((edge) => ({
+            ...edge,
+            source: edge.source === oldCode ? newCode : edge.source,
+            target: edge.target === oldCode ? newCode : edge.target,
+          })),
+        )
+
+        // Обновить выбранный узел
+        if (selectedNode?.id === nodeId) {
+          setSelectedNode((prev) => (prev ? { ...prev, id: newCode, data: { ...prev.data, ...newData } } : null))
+        }
+
+        toast.success("Код команды обновлен")
+      } else {
+        // Обычное обновление данных
+        updateNodeAndConnections(nodeId, (currentData) => ({ ...currentData, ...newData }))
+      }
     },
-    [updateNodeAndConnections],
+    [updateNodeAndConnections, nodes, checkCodeUniqueness, setNodes, setEdges, selectedNode, setSelectedNode],
   )
 
   const operations = {
@@ -566,6 +687,7 @@ export function useCJMEditor() {
     isValidConnection,
     onNodeClick,
     onUpdateNodeData,
+    checkCodeUniqueness,
     ...nodeCreators,
     ...operations,
     getExportJson: () => cjmOperations.exportToJson({ nodes, edges, mapSettings }),
