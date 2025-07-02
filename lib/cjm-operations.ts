@@ -60,14 +60,15 @@ export class CJMOperations {
       })
 
       toast.dismiss()
-      if (response.success) {
-        const result = await response.json()
+        
+      const result = await response.json()
+      
+      if (result.success) {
         toast.success("Successfully exported to Metabot!")
         console.log("Export successful:", result)
       } else {
-        const errorResult = await response.json()
-        toast.error(`Export failed: ${errorResult.message || response.statusText}`)
-        console.error("Export failed:", errorResult)
+        toast.error(`Export failed: ${result.message}`)
+        console.error("Export failed:", result)
       }
     } catch (error) {
       toast.dismiss()

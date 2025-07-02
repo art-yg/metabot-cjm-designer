@@ -75,7 +75,7 @@ export function importSendText(step: any): Node<SendTextNodeData> {
     id: uuidv4(),
     title: btn.title || "",
     next_step: btn.next_step || btn.target_code || null,
-    row: btn.row || 1,
+    row: btn.row || undefined,
     input_code: btn.input_code || "",
     js_condition: btn.js_condition || "",
     value: btn.value || "",
