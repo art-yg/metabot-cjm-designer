@@ -1,8 +1,8 @@
 "use client"
 
 import { ReactFlowProvider } from "reactflow"
-import { CJMEditor } from "@/components/cjm-editor"
-import { useCJMEditor } from "@/hooks/use-cjm-editor"
+import { CJMDesigner } from "@/components/cjm-designer"
+import { useCJMDesigner } from "@/hooks/use-cjm-designer"
 
 // Re-export types for backward compatibility
 export type {
@@ -20,19 +20,19 @@ export type {
   LogActionNodeData,
   CJMNodeData,
   CJMNode,
-} from "@/app/cjm-editor/types"
+} from "@/app/cjm-designer/types"
 
 import "reactflow/dist/style.css"
 
-function CJMFlowEditor() {
-  const editorState = useCJMEditor()
-  return <CJMEditor editorState={editorState} />
+function CJMFlowDesigner() {
+  const editorState = useCJMDesigner()
+  return <CJMDesigner editorState={editorState} />
 }
 
-export default function CJMEditorPage() {
+export default function CJMDesignerPage() {
   return (
     <ReactFlowProvider>
-      <CJMFlowEditor />
+              <CJMFlowDesigner />
     </ReactFlowProvider>
   )
 }

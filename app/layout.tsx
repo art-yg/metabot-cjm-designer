@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.dev',
+  title: 'CJM Designer',
+  description: 'Custom Journey Map Designer - Visual flow builder for customer journeys',
+  generator: 'CJM Designer',
 }
 
 export default function RootLayout({

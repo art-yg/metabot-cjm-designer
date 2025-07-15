@@ -1,5 +1,5 @@
 import type { Node } from "reactflow"
-import type { CJMNodeData } from "@/app/cjm-editor/page"
+import type { CJMNodeData } from "@/app/cjm-designer/page"
 import { exportSendText } from "./send-text"
 import { exportValueInput } from "./value-input"
 import { exportLogAction } from "./log-action"
@@ -12,6 +12,7 @@ import { exportCustomField } from "./custom-field"
 import { exportIfElse } from "./if-else"
 import { exportSwitch } from "./switch"
 import { exportCallLLM } from "./call-llm"
+import { exportSearchKnowledgebase } from "./search-knowledgebase"
 
 type NodeExporter = (node: Node<any>) => any
 
@@ -29,6 +30,7 @@ export const exporters: Record<string, NodeExporter> = {
   if_else: exportIfElse,
   switch: exportSwitch,
   call_llm: exportCallLLM,
+  search_knowledgebase: exportSearchKnowledgebase,
 }
 
 export function exportNode(node: Node<CJMNodeData>): any {

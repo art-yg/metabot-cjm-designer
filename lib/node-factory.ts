@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid"
-import type { CJMNode, CJMNodeData } from "@/app/cjm-editor/page"
+import type { CJMNode, CJMNodeData } from "@/app/cjm-designer/page"
 
 export interface NodeFactoryOptions {
   position?: { x: number; y: number }
@@ -247,6 +247,29 @@ export class NodeFactory {
         response: { enabled: false, save_to_attr: "user_response", display_to_user: true, format: "none" },
         trace_enabled: false,
         next_step: null,
+        error_step: null,
+        log_way_steps: undefined,
+      },
+      options,
+    )
+  }
+
+  createSearchKnowledgebaseNode(options?: NodeFactoryOptions): CJMNode {
+    const nodeId = `search_kb_${uuidv4().substring(0, 8)}`
+    return this.createBaseNode(
+      "searchKnowledgebase",
+      "searchKnowledgebase",
+      {
+        code: nodeId,
+        type: "search_knowledgebase",
+        title: "Поиск по базе знаний",
+        knowbase_name: "",
+        query_attr: "user_intent",
+        domain: "",
+        save_results_to_attr: "bestChunks",
+        trace_enabled: false,
+        next_step: null,
+        not_found_step: null,
         error_step: null,
         log_way_steps: undefined,
       },

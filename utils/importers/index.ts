@@ -1,5 +1,5 @@
 import type { Node } from "reactflow"
-import type { CJMNodeData } from "@/app/cjm-editor/page"
+import type { CJMNodeData } from "@/app/cjm-designer/page"
 import { importSendText } from "./send-text"
 import { importValueInput } from "./value-input"
 import { importLogAction } from "./log-action"
@@ -12,6 +12,7 @@ import { importCustomField } from "./custom-field"
 import { importIfElse } from "./if-else"
 import { importSwitch } from "./switch"
 import { importCallLLM } from "./call-llm"
+import { importSearchKnowledgebase } from "./search-knowledgebase"
 
 type NodeImporter = (step: any) => Node<CJMNodeData>
 
@@ -29,6 +30,7 @@ export const importers: Record<string, NodeImporter> = {
   if_else: importIfElse,
   switch: importSwitch,
   call_llm: importCallLLM,
+  search_knowledgebase: importSearchKnowledgebase,
 }
 
 export function importNode(step: any): Node<CJMNodeData> | null {

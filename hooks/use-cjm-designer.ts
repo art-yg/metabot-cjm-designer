@@ -23,7 +23,7 @@ import { cjmOperations } from "@/lib/cjm-operations"
 const initialNodes: CJMNode[] = []
 const initialEdges: Edge[] = []
 
-export function useCJMEditor() {
+export function useCJMDesigner() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null)
   const [nodes, setNodes, onNodesChangeGeneric] = useNodesState<CJMNode>(initialNodes)
   const [edges, setEdges, onEdgesChangeGeneric] = useEdgesState<Edge>(initialEdges)

@@ -1,5 +1,5 @@
 import type { Node, Edge } from "reactflow"
-import type { CJMNodeData } from "@/app/cjm-editor/page"
+import type { CJMNodeData } from "@/app/cjm-designer/page"
 import type { MapSettings } from "./map-settings"
 import { exportNode } from "@/utils/exporters"
 import { importNode } from "@/utils/importers"
@@ -111,6 +111,33 @@ export function importFromJson(jsonString: string): {
           console.warn(
             `Edge target node ${step.error_step} for source ${step.code} (error_step) not found. Skipping edge.`,
           )
+        }
+      }
+
+      // Handle not_found_step and error_step for search_knowledgebase nodes
+      if (step.type === "search_knowledgebase") {
+        if (step.not_found_step && nodes.find((n) => n.id === step.not_found_step)) {
+          const edge: Edge = {
+            id: `${step.code}-not_found-${step.not_found_step}`,
+            source: step.code,
+            target: step.not_found_step,
+            sourceHandle: "not_found_step",
+            type: "smoothstep",
+            animated: true,
+          }
+          edges.push(edge)
+        }
+        
+        if (step.error_step && nodes.find((n) => n.id === step.error_step)) {
+          const edge: Edge = {
+            id: `${step.code}-error-${step.error_step}`,
+            source: step.code,
+            target: step.error_step,
+            sourceHandle: "error_step",
+            type: "smoothstep",
+            animated: true,
+          }
+          edges.push(edge)
         }
       }
 

@@ -1,5 +1,5 @@
 import type { Node, Edge } from "reactflow"
-import type { CJMNodeData } from "@/app/cjm-editor/page"
+import type { CJMNodeData } from "@/app/cjm-designer/page"
 import type { MapSettings } from "./map-settings"
 import { exportToJson, importFromJson } from "./serialization"
 import { toast } from "react-hot-toast"

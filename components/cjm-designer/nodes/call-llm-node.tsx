@@ -42,7 +42,7 @@ export interface CallLLMNodeData {
 
 function CallLLMNode(props: NodeProps<CallLLMNodeData>) {
   const { data, selected, id, isConnectable, xPos, yPos, zIndex, type, dragging } = props
-  const hasAnalytics = data.log_way_steps?.steps?.length > 0
+  const hasAnalytics = data.log_way_steps?.steps?.length && data.log_way_steps.steps.length > 0
   const promptCount = (data.system_prompts?.start?.length || 0) + (data.system_prompts?.final?.length || 0)
   return (
     <NodeBase
@@ -67,8 +67,44 @@ function CallLLMNode(props: NodeProps<CallLLMNodeData>) {
         <div><b>Модель:</b> {data.model || <span className="text-gray-400">not set</span>}</div>
         <div><b>Таблица промптов:</b> {data.prompt_table || <span className="text-gray-400">not set</span>}</div>
         <div><b>Промпты:</b> {promptCount}</div>
+        
+        {/* Дополнительные настройки */}
+        <div className="border-t pt-1 mt-2">
+          {/* История */}
+          <div className="flex items-center space-x-2">
+            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${data.history?.enabled ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+            <span><b>История:</b> {data.history?.enabled ? `${data.history.save_to_attr} (${data.history.max_length})${data.history.add_to_prompts ? ' →промпт' : ''}` : 'выкл'}</span>
+          </div>
+          
+          {/* User Query */}
+          <div className="flex items-center space-x-2">
+            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${data.user_query?.enabled ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+            <span><b>Запрос:</b> {data.user_query?.enabled ? `${data.user_query.attr}${data.user_query.add_to_prompts ? ' →промпт' : ''}` : 'выкл'}</span>
+          </div>
+          
+          {/* Response */}
+          <div className="flex items-center space-x-2">
+            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${data.response?.enabled ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+            <span><b>Ответ:</b> {data.response?.enabled ? `${data.response.save_to_attr}${data.response.format !== 'none' ? ` (${data.response.format})` : ''}` : 'выкл'}</span>
+          </div>
+          
+          {/* Отображение в чате */}
+          {data.response?.enabled && (
+            <div className="flex items-center space-x-2 ml-4">
+              <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${data.response.display_to_user ? 'bg-blue-500' : 'bg-gray-300'}`}></span>
+              <span>показ в чате: {data.response.display_to_user ? 'да' : 'нет'}</span>
+            </div>
+          )}
+          
+          {/* Трассировка */}
+          {data.trace_enabled && (
+            <div className="text-amber-600 text-xs">
+              <b>Трассировка включена</b>
+            </div>
+          )}
+        </div>
       </div>
-      {hasAnalytics && data.log_way_steps?.steps?.length > 0 && (
+      {hasAnalytics && data.log_way_steps?.steps && (
         <div className="border-t pt-2 mt-2">
           <div className="text-xs font-medium text-gray-700 mb-1 flex items-center">
             <span className="mr-1">Analytics:</span> {data.log_way_steps.steps.length}
@@ -100,13 +136,13 @@ function CallLLMNode(props: NodeProps<CallLLMNodeData>) {
         style={{ bottom: -6, left: "50%", transform: "translateX(-50%)" }}
         isConnectable={isConnectable}
       />
-      {/* Right error output */}
+      {/* Left error output */}
       <Handle
         type="source"
-        position={Position.Right}
+        position={Position.Left}
         id="error_step"
         className="!w-3 !h-3 !bg-red-500"
-        style={{ right: -6, top: "50%", transform: "translateY(-50%)" }}
+        style={{ left: -6, top: "50%", transform: "translateY(-50%)" }}
         isConnectable={isConnectable}
       />
     </NodeBase>

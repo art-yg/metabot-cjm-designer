@@ -3,25 +3,26 @@ import ReactFlow, { Controls, Background } from "reactflow"
 import { Toaster } from "react-hot-toast"
 import { UploadCloud, Save, FileJson, RotateCcw, Settings } from "lucide-react"
 
-import SendTextNodeFull from "@/components/cjm-editor/nodes/send-text-node"
-import ValueInputNodeFull from "@/components/cjm-editor/nodes/value-input-node"
-import RunScriptNodeFull from "@/components/cjm-editor/nodes/run-script-node"
-import EntryPointNodeFull from "@/components/cjm-editor/nodes/entry-point-node"
-import GoToMapEntryNodeFull from "@/components/cjm-editor/nodes/go-to-map-entry-node"
-import WaitNodeFull from "@/components/cjm-editor/nodes/wait-node"
-import TagsNodeFull from "@/components/cjm-editor/nodes/tags-node"
-import CustomFieldNodeFull from "@/components/cjm-editor/nodes/custom-field-node"
-import IfElseNodeFull from "@/components/cjm-editor/nodes/if-else-node"
-import SwitchNodeFull from "@/components/cjm-editor/nodes/switch-node"
-import LogActionNodeFull from "@/components/cjm-editor/nodes/log-action-node"
-import CallLLMNodeFull from "@/components/cjm-editor/nodes/call-llm-node"
+import SendTextNodeFull from "@/components/cjm-designer/nodes/send-text-node"
+import ValueInputNodeFull from "@/components/cjm-designer/nodes/value-input-node"
+import RunScriptNodeFull from "@/components/cjm-designer/nodes/run-script-node"
+import EntryPointNodeFull from "@/components/cjm-designer/nodes/entry-point-node"
+import GoToMapEntryNodeFull from "@/components/cjm-designer/nodes/go-to-map-entry-node"
+import WaitNodeFull from "@/components/cjm-designer/nodes/wait-node"
+import TagsNodeFull from "@/components/cjm-designer/nodes/tags-node"
+import CustomFieldNodeFull from "@/components/cjm-designer/nodes/custom-field-node"
+import IfElseNodeFull from "@/components/cjm-designer/nodes/if-else-node"
+import SwitchNodeFull from "@/components/cjm-designer/nodes/switch-node"
+import LogActionNodeFull from "@/components/cjm-designer/nodes/log-action-node"
+import CallLLMNodeFull from "@/components/cjm-designer/nodes/call-llm-node"
+import SearchKnowledgebaseNodeFull from "@/components/cjm-designer/nodes/search-knowledgebase-node"
 
-import EditPanel from "@/components/cjm-editor/edit-panel"
-import Palette from "@/components/cjm-editor/palette"
-import JsonModal from "@/components/cjm-editor/json-modal"
-import SettingsModal from "@/components/cjm-editor/settings-modal"
+import EditPanel from "@/components/cjm-designer/edit-panel"
+import Palette from "@/components/cjm-designer/palette"
+import JsonModal from "@/components/cjm-designer/json-modal"
+import SettingsModal from "@/components/cjm-designer/settings-modal"
 
-import type { useCJMEditor } from "@/hooks/use-cjm-editor"
+import type { useCJMDesigner } from "@/hooks/use-cjm-designer"
 
 const nodeTypes = {
   sendText: SendTextNodeFull,
@@ -36,13 +37,14 @@ const nodeTypes = {
   switch: SwitchNodeFull,
   logAction: LogActionNodeFull,
   callLLM: CallLLMNodeFull,
+  searchKnowledgebase: SearchKnowledgebaseNodeFull,
 }
 
-interface CJMEditorProps {
-  editorState: ReturnType<typeof useCJMEditor>
+interface CJMDesignerProps {
+  editorState: ReturnType<typeof useCJMDesigner>
 }
 
-export function CJMEditor({ editorState }: CJMEditorProps) {
+export function CJMDesigner({ editorState }: CJMDesignerProps) {
   const {
     // State
     nodes,
@@ -80,6 +82,7 @@ export function CJMEditor({ editorState }: CJMEditorProps) {
     addSwitchNode,
     addLogActionNode,
     addCallLLMNode,
+    addSearchKnowledgebaseNode,
 
     // Operations
     exportToMetabot,
@@ -96,7 +99,7 @@ export function CJMEditor({ editorState }: CJMEditorProps) {
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       <header className="p-3 bg-white border-b border-gray-200 flex justify-between items-center">
-        <h1 className="text-lg font-semibold text-gray-700">CJM Editor / {mapSettings.title}</h1>
+        <h1 className="text-lg font-semibold text-gray-700">CJM Designer / {mapSettings.title}</h1>
         <div className="flex space-x-2">
           <button
             onClick={() => setIsSettingsModalOpen(true)}
@@ -147,6 +150,7 @@ export function CJMEditor({ editorState }: CJMEditorProps) {
           onAddSwitchNode={addSwitchNode}
           onAddLogActionNode={addLogActionNode}
           onAddCallLLMNode={addCallLLMNode}
+          onAddSearchKnowledgebaseNode={addSearchKnowledgebaseNode}
         />
 
         <div className="flex-grow h-full" ref={reactFlowWrapper}>

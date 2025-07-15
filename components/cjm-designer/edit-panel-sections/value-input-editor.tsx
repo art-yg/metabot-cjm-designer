@@ -269,8 +269,27 @@ function ValueInputEditor({ node, onUpdateData }: ValueInputEditorProps) {
               />
               <p className="text-xs text-gray-500 mt-1">Step to execute when timeout occurs</p>
             </div>
-          </div>
+                    </div>
         )}
+
+        {/* Exit Step Field */}
+        <div>
+          <label htmlFor="exit_step" className="block text-sm font-medium text-gray-600 mb-1">
+            Exit Step:
+          </label>
+          <Input
+            id="exit_step"
+            type="text"
+            value={data.exit_step || ""}
+            onChange={(e) => handleFieldChange("exit_step", e.target.value || null)}
+            className="w-full"
+            placeholder="Enter step code for exit/cancel action"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Step to execute when user cancels input (e.g., types "отмена", "стоп") or exit condition is met
+          </p>
+        </div>
+        
       </div>
     </div>
   )

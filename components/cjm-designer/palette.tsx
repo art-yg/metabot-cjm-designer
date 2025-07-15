@@ -14,6 +14,7 @@ interface PaletteProps {
   onAddSwitchNode: () => void
   onAddLogActionNode: () => void
   onAddCallLLMNode: () => void
+  onAddSearchKnowledgebaseNode: () => void
 }
 
 function Palette({
@@ -29,6 +30,7 @@ function Palette({
   onAddSwitchNode,
   onAddLogActionNode,
   onAddCallLLMNode,
+  onAddSearchKnowledgebaseNode,
 }: PaletteProps) {
   return (
     <div className="w-60 bg-gray-100 p-4 border-r border-gray-200 flex flex-col h-full">
@@ -119,6 +121,13 @@ function Palette({
           >
             <PlusCircle size={18} className="mr-2" />
             Обращение к LLM
+          </button>
+          <button
+            onClick={onAddSearchKnowledgebaseNode}
+            className="flex items-center justify-start w-full px-3 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2 transition-colors"
+          >
+            <PlusCircle size={18} className="mr-2" />
+            Поиск по базе знаний
           </button>
         </div>
 

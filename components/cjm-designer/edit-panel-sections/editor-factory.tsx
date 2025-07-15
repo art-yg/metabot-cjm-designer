@@ -14,6 +14,7 @@ import IfElseEditor from "./if-else-editor"
 import SwitchEditor from "./switch-editor"
 import LogActionEditor from "./log-action-editor"
 import CallLLMLEditor from "./call-llm-editor"
+import SearchKnowledgebaseEditor from "./search-knowledgebase-editor"
 
 interface EditorFactoryProps {
   node: CJMNode
@@ -24,7 +25,7 @@ interface EditorFactoryProps {
 }
 
 // Типы команд с аналитикой (точки выполнения действий)
-const ANALYTICS_ENABLED_TYPES = ["send_text", "value_input", "add_tags", "remove_tags", "set_custom_field"] as const
+const ANALYTICS_ENABLED_TYPES = ["send_text", "value_input", "add_tags", "remove_tags", "set_custom_field", "search_knowledgebase", "call_llm"] as const
 
 function EditorFactory({ node, onClose, onUpdateData, mapSettings, checkCodeUniqueness }: EditorFactoryProps) {
   const nodeType = node.data.type
@@ -59,6 +60,8 @@ function EditorFactory({ node, onClose, onUpdateData, mapSettings, checkCodeUniq
         return <LogActionEditor node={node} onUpdateData={onUpdateData} />
       case "call_llm":
         return <CallLLMLEditor node={node} onUpdateData={onUpdateData} />
+      case "search_knowledgebase":
+        return <SearchKnowledgebaseEditor node={node} onUpdateData={onUpdateData} />
       default:
         return <p className="text-sm text-gray-500">This node type has no editable properties or is unknown.</p>
     }

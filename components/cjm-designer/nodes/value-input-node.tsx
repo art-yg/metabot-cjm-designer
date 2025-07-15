@@ -191,22 +191,24 @@ function ValueInputNode({
         isConnectable={isConnectable}
       />
 
+      {/* Exit step - красный слева сверху */}
       <Handle
         type="source"
-        position={Position.Right}
+        position={Position.Left}
         id="exit_step"
         className="!w-3 !h-3 !bg-red-500"
-        style={{ right: -6 }}
+        style={{ left: -6, top: "40%" }}
         isConnectable={isConnectable}
       />
 
+      {/* Timeout step - синий слева снизу */}
       {hasTimeout && (
         <Handle
           type="source"
           position={Position.Left}
           id="timeout_step"
           className="!w-3 !h-3 !bg-blue-500"
-          style={{ left: -6 }}
+          style={{ left: -6, top: "60%" }}
           isConnectable={isConnectable}
         />
       )}

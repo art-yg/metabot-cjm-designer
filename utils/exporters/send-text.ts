@@ -1,8 +1,8 @@
 import type { Node } from "reactflow"
-import type { SendTextNodeData } from "@/components/cjm-editor/nodes/send-text-node"
+import type { SendTextNodeData } from "@/components/cjm-designer/nodes/send-text-node"
 import type { Link } from "@/lib/link-types"
 import type { Trigger, TriggerActionBlock } from "@/lib/trigger-types"
-import type { CJMNode } from "@/app/cjm-editor/types"
+import type { CJMNode } from "@/app/cjm-designer/types"
 
 // Helper to convert camelCase to snake_case
 const toSnakeCase = (str: string): string => {
