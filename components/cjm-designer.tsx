@@ -1,7 +1,7 @@
 "use client"
-import ReactFlow, { Controls, Background } from "reactflow"
+import { useState } from "react"
+import ReactFlow, { Background } from "reactflow"
 import { Toaster } from "react-hot-toast"
-import { UploadCloud, Save, FileJson, RotateCcw, Settings } from "lucide-react"
 
 import SendTextNodeFull from "@/components/cjm-designer/nodes/send-text-node"
 import ValueInputNodeFull from "@/components/cjm-designer/nodes/value-input-node"
@@ -17,12 +17,17 @@ import LogActionNodeFull from "@/components/cjm-designer/nodes/log-action-node"
 import CallLLMNodeFull from "@/components/cjm-designer/nodes/call-llm-node"
 import SearchKnowledgebaseNodeFull from "@/components/cjm-designer/nodes/search-knowledgebase-node"
 
-import EditPanel from "@/components/cjm-designer/edit-panel"
-import Palette from "@/components/cjm-designer/palette"
 import JsonModal from "@/components/cjm-designer/json-modal"
 import SettingsModal from "@/components/cjm-designer/settings-modal"
+import { HeaderLeft } from "@/components/cjm-designer/header-left"
+import { HeaderRight } from "@/components/cjm-designer/header-right"
+import { CompactToolbar } from "@/components/cjm-designer/compact-toolbar"
+import { ZoomControls } from "@/components/cjm-designer/zoom-controls"
+import { AddNodePopover } from "@/components/cjm-designer/add-node-popover"
+import { NodeEditModal } from "@/components/cjm-designer/node-edit-modal"
 
 import type { useCJMDesigner } from "@/hooks/use-cjm-designer"
+import type { CJMNode } from "@/app/cjm-designer/types"
 
 const nodeTypes = {
   sendText: SendTextNodeFull,
@@ -68,6 +73,7 @@ export function CJMDesigner({ editorState }: CJMDesignerProps) {
     isValidConnection,
     onNodeClick,
     onUpdateNodeData,
+    checkCodeUniqueness,
 
     // Node creators
     addSendTextNode,
@@ -93,97 +99,113 @@ export function CJMDesigner({ editorState }: CJMDesignerProps) {
     getExportJson,
   } = editorState
 
+  // Новое состояние для интерфейса
+  const [selectedTool, setSelectedTool] = useState<'pointer' | 'add'>('pointer')
+  const [isAddNodePopoverOpen, setIsAddNodePopoverOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [editingNodeId, setEditingNodeId] = useState<string | null>(null)
+
   // Отладка mapSettings
-  console.log("CJMEditor mapSettings:", mapSettings)
+  // console.log("CJMEditor mapSettings:", mapSettings)
+
+  const nodeCreators = {
+    onAddSendTextNode: addSendTextNode,
+    onAddInputNode: addInputNode,
+    onAddRunScriptNode: addRunScriptNode,
+    onAddEntryPointNode: addEntryPointNode,
+    onAddGoToMapEntryNode: addGoToMapEntryNode,
+    onAddWaitNode: addWaitNode,
+    onAddTagsNode: addTagsNode,
+    onAddCustomFieldNode: addCustomFieldNode,
+    onAddIfElseNode: addIfElseNode,
+    onAddSwitchNode: addSwitchNode,
+    onAddLogActionNode: addLogActionNode,
+    onAddCallLLMNode: addCallLLMNode,
+    onAddSearchKnowledgebaseNode: addSearchKnowledgebaseNode,
+  }
+
+  // Получаем актуальный узел для редактирования из массива nodes
+  const foundNode = editingNodeId ? nodes.find(node => node.id === editingNodeId) : null
+  const nodeToEdit = foundNode ? foundNode as any : null
+
+  // Обработчики для модального редактирования
+  const handleNodeDoubleClick = (event: React.MouseEvent, node: CJMNode) => {
+    event.stopPropagation()
+    setEditingNodeId(node.id)
+    setIsEditModalOpen(true)
+  }
+
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false)
+    setEditingNodeId(null)
+  }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      <header className="p-3 bg-white border-b border-gray-200 flex justify-between items-center">
-        <h1 className="text-lg font-semibold text-gray-700">CJM Designer / {mapSettings.title}</h1>
-        <div className="flex space-x-2">
-          <button
-            onClick={() => setIsSettingsModalOpen(true)}
-            className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1 transition-colors"
-            title="Настройки карты"
-          >
-            <Settings size={16} />
-          </button>
-          <button
-            onClick={loadDraft}
-            className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1 flex items-center"
-            title="Reload last saved draft"
-          >
-            <RotateCcw size={14} className="mr-1.5" /> Load Draft
-          </button>
-          <button
-            onClick={saveDraft}
-            className="px-3 py-1.5 text-xs font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 flex items-center"
-          >
-            <Save size={14} className="mr-1.5" /> Save Draft
-          </button>
-          <button
-            onClick={exportJson}
-            className="px-3 py-1.5 text-xs font-medium text-white bg-purple-500 rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1 flex items-center"
-          >
-            <FileJson size={14} className="mr-1.5" /> JSON I/O
-          </button>
-          <button
-            onClick={exportToMetabot}
-            className="px-3 py-1.5 text-xs font-medium text-white bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 flex items-center"
-          >
-            <UploadCloud size={14} className="mr-1.5" /> To Metabot
-          </button>
-        </div>
-      </header>
+    <div className="h-screen bg-gradient-to-br from-slate-50 to-gray-100 overflow-hidden">
+      {/* Левая плашка с логотипом */}
+      <HeaderLeft 
+        projectTitle={mapSettings.title}
+        onSettingsClick={() => setIsSettingsModalOpen(true)}
+      />
 
-      <div className="flex flex-grow overflow-hidden">
-        <Palette
-          onAddSendTextNode={addSendTextNode}
-          onAddInputNode={addInputNode}
-          onAddRunScriptNode={addRunScriptNode}
-          onAddEntryPointNode={addEntryPointNode}
-          onAddGoToMapEntryNode={addGoToMapEntryNode}
-          onAddWaitNode={addWaitNode}
-          onAddTagsNode={addTagsNode}
-          onAddCustomFieldNode={addCustomFieldNode}
-          onAddIfElseNode={addIfElseNode}
-          onAddSwitchNode={addSwitchNode}
-          onAddLogActionNode={addLogActionNode}
-          onAddCallLLMNode={addCallLLMNode}
-          onAddSearchKnowledgebaseNode={addSearchKnowledgebaseNode}
-        />
+      {/* Правая плашка с кнопками */}
+      <HeaderRight
+        onLoadDraft={loadDraft}
+        onSaveDraft={saveDraft}
+        onExportJson={exportJson}
+        onExportToMetabot={exportToMetabot}
+      />
 
-        <div className="flex-grow h-full" ref={reactFlowWrapper}>
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            isValidConnection={isValidConnection}
-            nodeTypes={nodeTypes}
-            onNodeClick={onNodeClick}
-            onPaneClick={() => setSelectedNode(null)}
-            className="bg-gradient-to-br from-slate-50 to-gray-100"
-            fitView
-            fitViewOptions={{ padding: 0.2 }}
-            deleteKeyCode={["Backspace", "Delete"]}
-          >
-            <Controls />
-            <Background gap={16} color="#e0e0e0" />
-          </ReactFlow>
-        </div>
+      {/* Компактный левый toolbar */}
+      <CompactToolbar
+        selectedTool={selectedTool}
+        onToolSelect={setSelectedTool}
+        onAddNode={() => setIsAddNodePopoverOpen(true)}
+      />
 
-        {selectedNode && (
-          <EditPanel
-            node={selectedNode}
-            onClose={() => setSelectedNode(null)}
-            onUpdateData={onUpdateNodeData}
-            mapSettings={mapSettings}
-          />
-        )}
+      {/* Zoom controls в правом нижнем углу */}
+      <ZoomControls />
+
+      {/* Основная область с ReactFlow */}
+      <div className="h-full w-full" ref={reactFlowWrapper}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          isValidConnection={isValidConnection}
+          nodeTypes={nodeTypes}
+          onNodeClick={onNodeClick}
+          onNodeDoubleClick={handleNodeDoubleClick}
+          onPaneClick={() => setSelectedNode(null)}
+          className="bg-transparent"
+          fitView
+          fitViewOptions={{ padding: 0.2 }}
+          deleteKeyCode={["Backspace", "Delete"]}
+        >
+          <Background gap={16} color="#e0e0e0" />
+        </ReactFlow>
       </div>
 
+      {/* Модальное окно редактирования узла */}
+      <NodeEditModal
+        isOpen={isEditModalOpen}
+        onClose={handleEditModalClose}
+        node={nodeToEdit}
+        onUpdateData={onUpdateNodeData}
+        mapSettings={mapSettings}
+        checkCodeUniqueness={checkCodeUniqueness}
+      />
+
+      {/* Всплывающее окно добавления компонентов */}
+      <AddNodePopover
+        isOpen={isAddNodePopoverOpen}
+        onClose={() => setIsAddNodePopoverOpen(false)}
+        nodeCreators={nodeCreators}
+      />
+
+      {/* Модальные окна */}
       <JsonModal
         isOpen={isJsonModalOpen}
         onClose={() => setIsJsonModalOpen(false)}

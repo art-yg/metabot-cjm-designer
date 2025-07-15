@@ -1,5 +1,5 @@
 "use client"
-import type { CJMNode } from "@/app/cjm-editor/types"
+import type { CJMNode } from "@/app/cjm-designer/types"
 import type { MapSettings } from "@/lib/map-settings"
 import BaseEditor from "./base-editor"
 import SendTextEditor from "./send-text-editor"
@@ -22,16 +22,17 @@ interface EditorFactoryProps {
   onUpdateData: (nodeId: string, newData: any) => void
   mapSettings: MapSettings
   checkCodeUniqueness?: (code: string, currentNodeId: string) => boolean
+  isModal?: boolean
 }
 
 // Типы команд с аналитикой (точки выполнения действий)
 const ANALYTICS_ENABLED_TYPES = ["send_text", "value_input", "add_tags", "remove_tags", "set_custom_field", "search_knowledgebase", "call_llm"] as const
 
-function EditorFactory({ node, onClose, onUpdateData, mapSettings, checkCodeUniqueness }: EditorFactoryProps) {
+function EditorFactory({ node, onClose, onUpdateData, mapSettings, checkCodeUniqueness, isModal = false }: EditorFactoryProps) {
   const nodeType = node.data.type
   const withAnalytics = ANALYTICS_ENABLED_TYPES.includes(nodeType as any)
 
-  console.log("EditorFactory mapSettings:", mapSettings)
+  // console.log("EditorFactory mapSettings:", mapSettings)
 
   const renderEditor = () => {
     switch (nodeType) {
@@ -75,6 +76,7 @@ function EditorFactory({ node, onClose, onUpdateData, mapSettings, checkCodeUniq
       withAnalytics={withAnalytics}
       checkCodeUniqueness={checkCodeUniqueness}
       labelOverride={node.data.type === "call_llm" ? node.data.title : undefined}
+      isModal={isModal}
     >
       {renderEditor()}
     </BaseEditor>

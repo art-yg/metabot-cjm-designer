@@ -561,7 +561,7 @@ export function useCJMDesigner() {
 
             // Обновить timeout.exit_step для wait узлов
             if ((updatedData as any).timeout?.exit_step === oldCode) {
-              ;(updatedData as any).timeout.exit_step = newCode
+              ;(updatedData as any).timeout = { ...(updatedData as any).timeout, exit_step: newCode }
             }
 
             // Обновить кнопки для send_text узлов
@@ -616,7 +616,7 @@ export function useCJMDesigner() {
           setSelectedNode((prev) => (prev ? { ...prev, id: newCode, data: { ...prev.data, ...newData } } : null))
         }
 
-        toast.success("Код команды обновлен")
+        // toast.success("Код команды обновлен") // Убрано - теперь сохранение контролируется в модальном окне
       } else {
         // Обычное обновление данных
         updateNodeAndConnections(nodeId, (currentData) => ({ ...currentData, ...newData }))

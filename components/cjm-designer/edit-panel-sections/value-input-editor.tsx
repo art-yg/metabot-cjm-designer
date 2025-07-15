@@ -10,8 +10,8 @@ import { Accordion, AccordionItem } from "@/components/ui/accordion"
 import { PlusCircle, Clock } from "lucide-react"
 import { v4 as uuidv4 } from "uuid"
 
-import type { CJMNode } from "@/app/cjm-editor/types"
-import type { ValueInputNodeData, ReminderItem } from "@/components/cjm-editor/nodes/value-input-node"
+import type { CJMNode } from "@/app/cjm-designer/types"
+import type { ValueInputNodeData, ReminderItem } from "@/components/cjm-designer/nodes/value-input-node"
 import ReminderItemEditor from "../reminder-item-editor"
 
 interface ValueInputEditorProps {

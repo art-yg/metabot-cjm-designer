@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import type { CJMNode } from "@/app/cjm-editor/types"
+import type { CJMNode } from "@/app/cjm-designer/types"
 import type { SearchKnowledgebaseNodeData } from "../nodes/search-knowledgebase-node"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"

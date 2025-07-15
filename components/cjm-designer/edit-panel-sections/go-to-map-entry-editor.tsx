@@ -2,8 +2,8 @@
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 
-import type { CJMNode } from "@/app/cjm-editor/types"
-import type { GoToMapEntryNodeData } from "@/components/cjm-editor/nodes/go-to-map-entry-node"
+import type { CJMNode } from "@/app/cjm-designer/types"
+import type { GoToMapEntryNodeData } from "@/components/cjm-designer/nodes/go-to-map-entry-node"
 
 interface GoToMapEntryEditorProps {
   node: CJMNode

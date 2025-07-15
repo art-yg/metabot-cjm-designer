@@ -1,8 +1,8 @@
 "use client"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-import type { CJMNode } from "@/app/cjm-editor/types"
-import type { TagsNodeData } from "@/components/cjm-editor/nodes/tags-node"
+import type { CJMNode } from "@/app/cjm-designer/types"
+import type { TagsNodeData } from "@/components/cjm-designer/nodes/tags-node"
 import TagsInput from "../tags-input"
 
 interface TagsEditorProps {

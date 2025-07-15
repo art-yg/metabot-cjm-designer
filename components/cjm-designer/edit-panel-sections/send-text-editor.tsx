@@ -9,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Settings2 } from "lucide-react"
 
-import type { CJMNode } from "@/app/cjm-editor/types"
-import type { SendTextNodeData } from "@/components/cjm-editor/nodes/send-text-node"
+import type { CJMNode } from "@/app/cjm-designer/types"
+import type { SendTextNodeData } from "@/components/cjm-designer/nodes/send-text-node"
 import type { Channel } from "@/lib/format-presets"
 import { CHANNEL_FRIENDLY_NAMES } from "@/lib/format-presets"
 import type { ChannelContent } from "@/lib/channel-types"

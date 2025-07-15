@@ -4,8 +4,8 @@ import DeepLinkSection from "../deep-link-section"
 import type { DeepLink } from "@/lib/deep-link-types"
 import type { MapSettings } from "@/lib/map-settings"
 
-import type { CJMNode } from "@/app/cjm-editor/types"
-import type { EntryPointNodeData } from "@/components/cjm-editor/nodes/entry-point-node"
+import type { CJMNode } from "@/app/cjm-designer/types"
+import type { EntryPointNodeData } from "@/components/cjm-designer/nodes/entry-point-node"
 
 interface EntryPointEditorProps {
   node: CJMNode

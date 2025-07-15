@@ -1,5 +1,5 @@
 "use client"
-import type { CJMNode, CJMNodeData } from "@/app/cjm-editor/types"
+import type { CJMNode, CJMNodeData } from "@/app/cjm-designer/types"
 import type { MapSettings } from "@/lib/map-settings"
 import EditorFactory from "./edit-panel-sections/editor-factory"
 
@@ -12,7 +12,7 @@ interface EditPanelProps {
 }
 
 function EditPanel({ node, onClose, onUpdateData, mapSettings, checkCodeUniqueness }: EditPanelProps) {
-  console.log("EditPanel mapSettings:", mapSettings)
+  // console.log("EditPanel mapSettings:", mapSettings)
 
   return (
     <EditorFactory

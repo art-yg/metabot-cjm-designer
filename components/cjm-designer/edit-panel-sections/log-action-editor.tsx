@@ -3,8 +3,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-import type { CJMNode } from "@/app/cjm-editor/types"
-import type { LogActionNodeData, LogActionType, TagAction } from "@/components/cjm-editor/nodes/log-action-node"
+import type { CJMNode } from "@/app/cjm-designer/types"
+import type { LogActionNodeData, LogActionType, TagAction } from "@/components/cjm-designer/nodes/log-action-node"
 
 interface LogActionEditorProps {
   node: CJMNode

@@ -85,17 +85,15 @@ function ButtonEditor({ buttons, onButtonsChange }: ButtonEditorProps) {
                       )}
                     </span>
                   </div>
-                  <Button
+                  <div
                     onClick={(e) => {
                       e.stopPropagation()
                       removeButton(button.id)
                     }}
-                    size="sm"
-                    variant="ghost"
-                    className="h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                    className="h-6 w-6 p-0 flex items-center justify-center rounded-sm text-red-500 hover:text-red-700 hover:bg-red-50 cursor-pointer transition-colors"
                   >
                     <Trash2 size={12} />
-                  </Button>
+                  </div>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-3 pb-3">

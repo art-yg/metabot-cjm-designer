@@ -2,8 +2,8 @@
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 
-import type { CJMNode } from "@/app/cjm-editor/types"
-import type { IfElseNodeData } from "@/components/cjm-editor/nodes/if-else-node"
+import type { CJMNode } from "@/app/cjm-designer/types"
+import type { IfElseNodeData } from "@/components/cjm-designer/nodes/if-else-node"
 
 interface IfElseEditorProps {
   node: CJMNode

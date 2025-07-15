@@ -311,41 +311,41 @@ function AnalyticsSection({ logWayData, onLogWayChange }: AnalyticsSectionProps)
                           )}
                         </div>
                         <div className="flex items-center space-x-1 mr-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
+                          <div
                             onClick={(e) => {
                               e.stopPropagation()
                               moveStep(index, "up")
                             }}
-                            disabled={index === 0}
-                            className="h-6 w-6"
+                            className={`h-6 w-6 flex items-center justify-center rounded-sm transition-colors cursor-pointer ${
+                              index === 0 
+                                ? "text-gray-300 cursor-not-allowed" 
+                                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                            }`}
                           >
                             <ChevronUp size={12} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
+                          </div>
+                          <div
                             onClick={(e) => {
                               e.stopPropagation()
-                              moveStep(index, "down")
+                              if (index < steps.length - 1) moveStep(index, "down")
                             }}
-                            disabled={index === steps.length - 1}
-                            className="h-6 w-6"
+                            className={`h-6 w-6 flex items-center justify-center rounded-sm transition-colors cursor-pointer ${
+                              index === steps.length - 1
+                                ? "text-gray-300 cursor-not-allowed"
+                                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                            }`}
                           >
                             <ChevronDown size={12} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
+                          </div>
+                          <div
                             onClick={(e) => {
                               e.stopPropagation()
                               removeStep(index)
                             }}
-                            className="h-6 w-6 text-red-500 hover:text-red-700"
+                            className="h-6 w-6 flex items-center justify-center rounded-sm text-red-500 hover:text-red-700 hover:bg-red-50 cursor-pointer transition-colors"
                           >
                             <Trash2 size={12} />
-                          </Button>
+                          </div>
                         </div>
                       </div>
                     </AccordionTrigger>

@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Скрыть React Flow attribution */
+.react-flow__attribution {
+  display: none !important;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

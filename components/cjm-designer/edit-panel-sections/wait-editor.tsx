@@ -1,8 +1,8 @@
 "use client"
 import { Input } from "@/components/ui/input"
 
-import type { CJMNode } from "@/app/cjm-editor/types"
-import type { WaitNodeData } from "@/components/cjm-editor/nodes/wait-node"
+import type { CJMNode } from "@/app/cjm-designer/types"
+import type { WaitNodeData } from "@/components/cjm-designer/nodes/wait-node"
 
 interface WaitEditorProps {
   node: CJMNode

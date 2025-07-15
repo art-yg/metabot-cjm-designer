@@ -3,7 +3,7 @@
 import type React from "react"
 import { X, Save } from "lucide-react"
 import { toast } from "react-hot-toast"
-import type { CJMNode, CJMNodeData } from "@/app/cjm-editor/types"
+import type { CJMNode, CJMNodeData } from "@/app/cjm-designer/types"
 import AnalyticsSection from "./analytics-section"
 import type { LogWayData } from "@/lib/analytics-types"
 import { useState, useEffect } from "react"
@@ -16,6 +16,7 @@ interface BaseEditorProps {
   children: React.ReactNode
   checkCodeUniqueness?: (code: string, currentNodeId: string) => boolean
   labelOverride?: string // new prop
+  isModal?: boolean
 }
 
 function BaseEditor({
@@ -26,6 +27,7 @@ function BaseEditor({
   children,
   checkCodeUniqueness,
   labelOverride,
+  isModal = false,
 }: BaseEditorProps) {
   const [codeError, setCodeError] = useState<string>("")
   const [tempCode, setTempCode] = useState(node.data.code)
@@ -47,11 +49,25 @@ function BaseEditor({
     const newCode = e.target.value
     setTempCode(newCode)
     validateCode(newCode)
+    
+    // В модальном режиме обновляем локальное состояние при изменении
+    // Это нужно для индикатора "Есть изменения"
+    if (isModal && newCode !== node.data.code) {
+      // Обновляем локальное состояние с новым кодом (даже если невалидный)
+      // Валидация произойдет при сохранении
+      onUpdateData(node.id, { code: newCode })
+    }
   }
 
   const handleCodeBlur = () => {
     if (tempCode.trim() && tempCode !== node.data.code && !codeError) {
-      onUpdateData(node.id, { code: tempCode.trim() })
+      if (isModal) {
+        // В модальном режиме обновляем локальное состояние
+        onUpdateData(node.id, { code: tempCode.trim() })
+      } else {
+        // В обычном режиме обновляем сразу
+        onUpdateData(node.id, { code: tempCode.trim() })
+      }
     }
   }
 
@@ -80,17 +96,19 @@ function BaseEditor({
   }
 
   return (
-    <div className="w-96 bg-white p-4 border-l border-gray-200 shadow-lg flex flex-col h-full">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-700">Edit Step: {labelOverride ?? node.data.title ?? node.data.code}</h3>
-        <button
-          onClick={onClose}
-          className="p-1 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100"
-          aria-label="Close edit panel"
-        >
-          <X size={20} />
-        </button>
-      </div>
+    <div className={isModal ? "w-full" : "w-96 bg-white p-4 border-l border-gray-200 shadow-lg flex flex-col h-full"}>
+      {!isModal && (
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-700">Edit Step: {labelOverride ?? node.data.title ?? node.data.code}</h3>
+          <button
+            onClick={onClose}
+            className="p-1 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100"
+            aria-label="Close edit panel"
+          >
+            <X size={20} />
+          </button>
+        </div>
+      )}
 
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-600 mb-1">Node Code (ID):</label>
@@ -116,7 +134,7 @@ function BaseEditor({
         <p className="text-gray-500 text-xs mt-1">Код используется как уникальный идентификатор команды</p>
       </div>
 
-      <div className="flex-grow overflow-y-auto custom-scrollbar pr-2 -mr-2 pb-4">
+      <div className={isModal ? "space-y-6" : "flex-grow overflow-y-auto custom-scrollbar pr-2 -mr-2 pb-4"}>
         {children}
 
         {withAnalytics && (
@@ -124,13 +142,15 @@ function BaseEditor({
         )}
       </div>
 
-      <button
-        onClick={handleSave}
-        className="w-full mt-auto px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center justify-center transition-colors"
-      >
-        <Save size={16} className="mr-2" />
-        Save Content
-      </button>
+      {!isModal && (
+        <button
+          onClick={handleSave}
+          className="w-full mt-auto px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center justify-center transition-colors"
+        >
+          <Save size={16} className="mr-2" />
+          Save Content
+        </button>
+      )}
     </div>
   )
 }

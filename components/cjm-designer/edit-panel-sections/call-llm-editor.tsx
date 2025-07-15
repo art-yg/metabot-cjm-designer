@@ -1,8 +1,6 @@
 import React, { useState } from "react"
-import type { CJMNode } from "@/app/cjm-editor/types"
+import type { CJMNode } from "@/app/cjm-designer/types"
 import type { CallLLMNodeData } from "../nodes/call-llm-node"
-import BaseEditor from "./base-editor"
-import AnalyticsSection from "./analytics-section"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -220,7 +218,7 @@ const CallLLMLEditor: React.FC<CallLLMLEditorProps> = ({ node, onUpdateData }) =
         </div>
       </div>
 
-      {/* Переходы и аналитика */}
+      {/* Переходы */}
       <div className="border rounded p-3">
         <Label className="mb-2 block">Переходы</Label>
         <div className="grid grid-cols-2 gap-3">
@@ -234,9 +232,6 @@ const CallLLMLEditor: React.FC<CallLLMLEditorProps> = ({ node, onUpdateData }) =
           </div>
         </div>
       </div>
-
-      {/* Аналитика */}
-      <AnalyticsSection logWayData={data.log_way_steps} onLogWayChange={logWay => onUpdateData(node.id, { log_way_steps: logWay })} />
     </div>
   )
 }

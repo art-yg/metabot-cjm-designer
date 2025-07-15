@@ -2,8 +2,8 @@
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 
-import type { CJMNode } from "@/app/cjm-editor/types"
-import type { RunScriptNodeData } from "@/components/cjm-editor/nodes/run-script-node"
+import type { CJMNode } from "@/app/cjm-designer/types"
+import type { RunScriptNodeData } from "@/components/cjm-designer/nodes/run-script-node"
 
 interface RunScriptEditorProps {
   node: CJMNode

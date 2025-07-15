@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button"
 import { PlusCircle, Trash2 } from "lucide-react"
 import { v4 as uuidv4 } from "uuid"
 
-import type { CJMNode } from "@/app/cjm-editor/types"
-import type { SwitchNodeData, SwitchCase } from "@/components/cjm-editor/nodes/switch-node"
+import type { CJMNode } from "@/app/cjm-designer/types"
+import type { SwitchNodeData, SwitchCase } from "@/components/cjm-designer/nodes/switch-node"
 
 interface SwitchEditorProps {
   node: CJMNode
