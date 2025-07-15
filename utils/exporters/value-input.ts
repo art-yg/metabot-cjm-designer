@@ -2,7 +2,7 @@ import type { Node } from "reactflow"
 import type { ValueInputNodeData } from "@/components/cjm-editor/nodes/value-input-node"
 
 export function exportValueInput(node: Node<ValueInputNodeData>) {
-  const { label, ...restData } = node.data
+  const { title, ...restData } = node.data
   const processedData = { ...restData }
 
   // Process reminders

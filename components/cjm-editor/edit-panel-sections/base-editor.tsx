@@ -15,6 +15,7 @@ interface BaseEditorProps {
   withAnalytics?: boolean
   children: React.ReactNode
   checkCodeUniqueness?: (code: string, currentNodeId: string) => boolean
+  labelOverride?: string // new prop
 }
 
 function BaseEditor({
@@ -24,6 +25,7 @@ function BaseEditor({
   withAnalytics = false,
   children,
   checkCodeUniqueness,
+  labelOverride,
 }: BaseEditorProps) {
   const [codeError, setCodeError] = useState<string>("")
   const [tempCode, setTempCode] = useState(node.data.code)
@@ -80,7 +82,7 @@ function BaseEditor({
   return (
     <div className="w-96 bg-white p-4 border-l border-gray-200 shadow-lg flex flex-col h-full">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-700">Edit Step: {node.data.label || node.data.code}</h3>
+        <h3 className="text-lg font-semibold text-gray-700">Edit Step: {labelOverride ?? node.data.title ?? node.data.code}</h3>
         <button
           onClick={onClose}
           className="p-1 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100"

@@ -15,7 +15,7 @@ export interface DelayConfig {
 export interface WaitNodeData {
   code: string
   type: "wait"
-  label: string // Client-side label
+  title: string // Client-side title
   delay: DelayConfig
   next_step: string | null
 }

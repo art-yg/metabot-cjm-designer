@@ -5,7 +5,7 @@ export function importRunScript(step: any): Node<RunScriptNodeData> {
   const nodeData: RunScriptNodeData = {
     code: step.code,
     type: "run_custom_script",
-    label: "Запустить скрипт",
+    title: "Запустить скрипт",
     script_code: step.script_code || "",
     note: step.note || "",
   }

@@ -33,7 +33,7 @@ export function importValueInput(step: any): Node<ValueInputNodeData> {
   const nodeData: ValueInputNodeData = {
     code: step.code,
     type: "value_input",
-    label: "User Input",
+    title: "User Input",
     variable: step.variable || "user_variable",
     prompt: step.prompt || "",
     validation_template: step.validation_template,

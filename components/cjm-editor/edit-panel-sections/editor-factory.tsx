@@ -13,6 +13,7 @@ import CustomFieldEditor from "./custom-field-editor"
 import IfElseEditor from "./if-else-editor"
 import SwitchEditor from "./switch-editor"
 import LogActionEditor from "./log-action-editor"
+import CallLLMLEditor from "./call-llm-editor"
 
 interface EditorFactoryProps {
   node: CJMNode
@@ -56,6 +57,8 @@ function EditorFactory({ node, onClose, onUpdateData, mapSettings, checkCodeUniq
         return <SwitchEditor node={node} onUpdateData={onUpdateData} />
       case "log_action":
         return <LogActionEditor node={node} onUpdateData={onUpdateData} />
+      case "call_llm":
+        return <CallLLMLEditor node={node} onUpdateData={onUpdateData} />
       default:
         return <p className="text-sm text-gray-500">This node type has no editable properties or is unknown.</p>
     }
@@ -68,6 +71,7 @@ function EditorFactory({ node, onClose, onUpdateData, mapSettings, checkCodeUniq
       onUpdateData={onUpdateData}
       withAnalytics={withAnalytics}
       checkCodeUniqueness={checkCodeUniqueness}
+      labelOverride={node.data.type === "call_llm" ? node.data.title : undefined}
     >
       {renderEditor()}
     </BaseEditor>

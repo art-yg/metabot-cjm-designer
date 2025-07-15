@@ -100,7 +100,7 @@ const exportLink = (link: Link): any => {
 }
 
 export function exportSendText(node: Node<SendTextNodeData>) {
-  const { label, ...restData } = node.data
+  const { title, ...restData } = node.data
   const processedData: any = { ...restData } // Start with a mutable copy
 
   // Remove empty content_per_channel if it exists
@@ -195,7 +195,7 @@ export function exportSendTextNode(node: CJMNode): any {
 
   const processedData: any = {
     code: data.code,
-    label: data.label,
+    title: data.title,
     content: data.content,
     type: "send_text",
     next_step: data.next_step,

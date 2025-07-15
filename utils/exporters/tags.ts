@@ -2,7 +2,7 @@ import type { Node } from "reactflow"
 import type { TagsNodeData } from "@/components/cjm-editor/nodes/tags-node"
 
 export function exportTags(node: Node<TagsNodeData>) {
-  const { label, ...restData } = node.data
+  const { title, ...restData } = node.data
   const processedData = { ...restData }
 
   // Process log_way_steps - remove client-side IDs and export as log_way_steps

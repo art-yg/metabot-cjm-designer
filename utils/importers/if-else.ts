@@ -7,7 +7,7 @@ export function importIfElse(step: any): Node<IfElseNodeData> {
   const nodeData: IfElseNodeData = {
     code: step.code,
     type: "if_else",
-    label: "Условие",
+    title: "Условие",
     condition: step.condition || "",
     next_step: step.next_step || null,
     else_step: step.else_step || null,

@@ -34,7 +34,7 @@ export class NodeFactory {
         type: "send_text", // Internal data type
         content: "New universal message...",
         next_step: null,
-        label: "Send Text", // Client-side label
+        title: "Send Text", // Client-side title
         content_per_channel: {}, // Default as empty object
         buttons: undefined,
         buttons_value_target: undefined,
@@ -53,7 +53,7 @@ export class NodeFactory {
       {
         code: nodeId,
         type: "value_input",
-        label: "User Input",
+        title: "User Input",
         variable: "user_variable",
         prompt: "Please provide your input.",
         next_step: null,
@@ -73,7 +73,7 @@ export class NodeFactory {
       {
         code: nodeId,
         type: "run_custom_script",
-        label: "Запустить скрипт",
+        title: "Запустить скрипт",
         script_code: "",
         note: "",
       },
@@ -90,7 +90,7 @@ export class NodeFactory {
         code: nodeId,
         type: "entry_point",
         name: "Стартовая точка",
-        label: "Точка входа",
+        title: "Точка входа",
         next_step: null,
       },
       options,
@@ -108,7 +108,7 @@ export class NodeFactory {
         target_map: "",
         entry_point: "",
         note: "",
-        label: "Переход в воронку",
+        title: "Переход в воронку",
       },
       options,
     )
@@ -122,7 +122,7 @@ export class NodeFactory {
       {
         code: nodeId,
         type: "wait",
-        label: "Ожидание",
+        title: "Ожидание",
         delay: {
           days: 0,
           hours: 0,
@@ -143,7 +143,7 @@ export class NodeFactory {
       {
         code: nodeId,
         type: tagType,
-        label: tagType === "add_tags" ? "Добавить теги" : "Удалить теги",
+        title: tagType === "add_tags" ? "Добавить теги" : "Удалить теги",
         tags: [],
         next_step: null,
         log_way_steps: undefined,
@@ -160,7 +160,7 @@ export class NodeFactory {
       {
         code: nodeId,
         type: "set_custom_field",
-        label: "Установить поле",
+        title: "Установить поле",
         scope: "lead",
         key: "",
         value: "",
@@ -180,7 +180,7 @@ export class NodeFactory {
       {
         code: nodeId,
         type: "if_else",
-        label: "Условие",
+        title: "Условие",
         condition: "",
         next_step: null, // For 'true' branch
         else_step: null, // For 'false' branch
@@ -197,7 +197,7 @@ export class NodeFactory {
       {
         code: nodeId,
         type: "switch",
-        label: "Switch",
+        title: "Switch",
         cases: [],
         default_step: null,
       },
@@ -213,7 +213,7 @@ export class NodeFactory {
       {
         code: nodeId,
         type: "log_action",
-        label: "Записать в аналитику",
+        title: "Записать в аналитику",
         log_type: "step", // Default log_type
         way: "",
         step: "",
@@ -223,6 +223,32 @@ export class NodeFactory {
         utter: "",
         note: "",
         next_step: null,
+      },
+      options,
+    )
+  }
+
+  createCallLLMNode(options?: NodeFactoryOptions): CJMNode {
+    const nodeId = `call_llm_${uuidv4().substring(0, 8)}`
+    return this.createBaseNode(
+      "callLLM",
+      "callLLM",
+      {
+        code: nodeId,
+        type: "call_llm",
+        title: "Обращение к LLM",
+        agent_name: "",
+        provider: "",
+        model: "",
+        prompt_table: "",
+        system_prompts: { start: [], final: [] },
+        history: { enabled: false, save_to_attr: "chat_history_str", max_length: 4, add_to_prompts: true },
+        user_query: { enabled: false, attr: "user_query", add_to_prompts: false },
+        response: { enabled: false, save_to_attr: "user_response", display_to_user: true, format: "none" },
+        trace_enabled: false,
+        next_step: null,
+        error_step: null,
+        log_way_steps: undefined,
       },
       options,
     )

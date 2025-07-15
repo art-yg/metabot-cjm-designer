@@ -13,6 +13,7 @@ interface PaletteProps {
   onAddIfElseNode: () => void
   onAddSwitchNode: () => void
   onAddLogActionNode: () => void
+  onAddCallLLMNode: () => void
 }
 
 function Palette({
@@ -27,6 +28,7 @@ function Palette({
   onAddIfElseNode,
   onAddSwitchNode,
   onAddLogActionNode,
+  onAddCallLLMNode,
 }: PaletteProps) {
   return (
     <div className="w-60 bg-gray-100 p-4 border-r border-gray-200 flex flex-col h-full">
@@ -110,6 +112,13 @@ function Palette({
           >
             <PlusCircle size={18} className="mr-2" />
             Записать в аналитику
+          </button>
+          <button
+            onClick={onAddCallLLMNode}
+            className="flex items-center justify-start w-full px-3 py-2 text-sm font-medium text-white bg-amber-700 rounded-md hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-700 focus:ring-offset-2 transition-colors"
+          >
+            <PlusCircle size={18} className="mr-2" />
+            Обращение к LLM
           </button>
         </div>
 

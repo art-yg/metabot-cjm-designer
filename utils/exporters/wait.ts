@@ -2,7 +2,7 @@ import type { Node } from "reactflow"
 import type { WaitNodeData } from "@/components/cjm-editor/nodes/wait-node"
 
 export function exportWait(node: Node<WaitNodeData>) {
-  const { label, ...restData } = node.data
+  const { title, ...restData } = node.data
 
   return {
     ...restData,

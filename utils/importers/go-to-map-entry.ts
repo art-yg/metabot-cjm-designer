@@ -8,7 +8,7 @@ export function importGoToMapEntry(step: any): Node<GoToMapEntryNodeData> {
     target_map: step.target_map || "",
     entry_point: step.entry_point || "",
     note: step.note || "",
-    label: "Переход в воронку",
+    title: "Переход в воронку",
   }
 
   return {

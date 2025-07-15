@@ -23,7 +23,7 @@ export interface TimeoutConfig {
 export interface ValueInputNodeData {
   code: string
   type: "value_input"
-  label: string
+  title: string
   variable: string
   prompt: string
   validation_template?: string

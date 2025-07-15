@@ -9,7 +9,7 @@ import type { LogWayData } from "@/lib/analytics-types"
 export interface TagsNodeData {
   code: string
   type: "add_tags" | "remove_tags"
-  label: string // Client-side label
+  title: string // Client-side title
   tags: string[]
   next_step: string | null
   log_way_steps?: LogWayData // Встроенная аналитика

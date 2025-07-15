@@ -14,6 +14,7 @@ import CustomFieldNodeFull from "@/components/cjm-editor/nodes/custom-field-node
 import IfElseNodeFull from "@/components/cjm-editor/nodes/if-else-node"
 import SwitchNodeFull from "@/components/cjm-editor/nodes/switch-node"
 import LogActionNodeFull from "@/components/cjm-editor/nodes/log-action-node"
+import CallLLMNodeFull from "@/components/cjm-editor/nodes/call-llm-node"
 
 import EditPanel from "@/components/cjm-editor/edit-panel"
 import Palette from "@/components/cjm-editor/palette"
@@ -34,6 +35,7 @@ const nodeTypes = {
   ifElse: IfElseNodeFull,
   switch: SwitchNodeFull,
   logAction: LogActionNodeFull,
+  callLLM: CallLLMNodeFull,
 }
 
 interface CJMEditorProps {
@@ -77,6 +79,7 @@ export function CJMEditor({ editorState }: CJMEditorProps) {
     addIfElseNode,
     addSwitchNode,
     addLogActionNode,
+    addCallLLMNode,
 
     // Operations
     exportToMetabot,
@@ -143,6 +146,7 @@ export function CJMEditor({ editorState }: CJMEditorProps) {
           onAddIfElseNode={addIfElseNode}
           onAddSwitchNode={addSwitchNode}
           onAddLogActionNode={addLogActionNode}
+          onAddCallLLMNode={addCallLLMNode}
         />
 
         <div className="flex-grow h-full" ref={reactFlowWrapper}>

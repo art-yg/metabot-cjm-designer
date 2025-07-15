@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 export interface IfElseNodeData {
   code: string
   type: "if_else"
-  label: string // Client-side label
+  title: string // Client-side title
   condition: string
   next_step: string | null // Then branch (true)
   else_step: string | null // Else branch (false)
@@ -36,7 +36,7 @@ function IfElseNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, typ
       <div className="absolute inset-0 -rotate-45 flex flex-col items-center justify-center p-3">
         <div className="flex items-center justify-center mb-2">
           <GitBranch size={20} className="text-yellow-800 mr-2" />
-          <span className="font-semibold text-sm text-yellow-900">{data.label || "Условие"}</span>
+          <span className="font-semibold text-sm text-yellow-900">{data.title || "Условие"}</span>
         </div>
         <div className="text-xs text-yellow-800 text-center max-w-full overflow-hidden">
           {data.condition ? (

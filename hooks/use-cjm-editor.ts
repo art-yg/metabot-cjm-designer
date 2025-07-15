@@ -100,6 +100,21 @@ export function useCJMEditor() {
         }
       }
 
+      // Handle error_step for call_llm nodes
+      if ((nodeData as any).error_step) {
+        const targetExists = nodes.some((n) => n.id === (nodeData as any).error_step)
+        if (targetExists) {
+          allEdges.push({
+            id: `${node.id}-error_step`,
+            source: node.id,
+            target: (nodeData as any).error_step,
+            sourceHandle: "error_step",
+            type: "smoothstep",
+            animated: true,
+          })
+        }
+      }
+
       // Handle timeout exit_step for wait nodes
       if (nodeData.type === "wait" && (nodeData as any).timeout?.exit_step) {
         const targetExists = nodes.some((n) => n.id === (nodeData as any).timeout.exit_step)
@@ -316,6 +331,7 @@ export function useCJMEditor() {
               else if (sourceHandle === "default_step" && "default_step" in newData)
                 (newData as any).default_step = null
               else if (sourceHandle === "exit_step" && "exit_step" in newData) (newData as any).exit_step = null
+              else if (sourceHandle === "error_step" && "error_step" in newData) (newData as any).error_step = null
               else if (sourceHandle === "timeout_step" && "timeout" in newData && (newData as any).timeout) {
                 ;(newData as any).timeout.exit_step = null
               } else if (sourceHandle.startsWith("button_") && newData.type === "send_text") {
@@ -367,7 +383,7 @@ export function useCJMEditor() {
       if (!connection.source || !connection.target || !connection.sourceHandle) return
       const { source, target, sourceHandle } = connection
 
-      const singleOutputHandles = new Set(["next_step", "else_step", "default_step", "exit_step", "timeout_step"])
+      const singleOutputHandles = new Set(["next_step", "else_step", "default_step", "exit_step", "timeout_step", "error_step"])
       const sourceNode = nodes.find((n) => n.id === source)
 
       if (singleOutputHandles.has(sourceHandle) && sourceNode) {
@@ -384,6 +400,7 @@ export function useCJMEditor() {
         else if (sourceHandle === "else_step" && "else_step" in newData) (newData as any).else_step = target
         else if (sourceHandle === "default_step" && "default_step" in newData) (newData as any).default_step = target
         else if (sourceHandle === "exit_step" && "exit_step" in newData) (newData as any).exit_step = target
+        else if (sourceHandle === "error_step" && "error_step" in newData) (newData as any).error_step = target
         else if (sourceHandle === "timeout_step" && "timeout" in newData) {
           ;(newData as any).timeout = { ...((newData as any).timeout || {}), exit_step: target }
         } else if (sourceHandle.startsWith("button_") && newData.type === "send_text") {
@@ -462,6 +479,7 @@ export function useCJMEditor() {
     addIfElseNode: useCallback(() => addNodeAtCenter(nodeFactory.createIfElseNode()), [addNodeAtCenter]),
     addSwitchNode: useCallback(() => addNodeAtCenter(nodeFactory.createSwitchNode()), [addNodeAtCenter]),
     addLogActionNode: useCallback(() => addNodeAtCenter(nodeFactory.createLogActionNode()), [addNodeAtCenter]),
+    addCallLLMNode: useCallback(() => addNodeAtCenter(nodeFactory.createCallLLMNode()), [addNodeAtCenter]),
   }
 
   const onNodeClick = useCallback((event: React.MouseEvent, node: CJMNode) => {

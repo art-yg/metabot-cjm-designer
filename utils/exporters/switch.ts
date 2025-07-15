@@ -2,7 +2,7 @@ import type { Node } from "reactflow"
 import type { SwitchNodeData } from "@/components/cjm-editor/nodes/switch-node"
 
 export function exportSwitch(node: Node<SwitchNodeData>) {
-  const { label, ...restData } = node.data
+  const { title, ...restData } = node.data
 
   // Remove client-side IDs from cases
   const exportedCases = restData.cases.map(({ id, ...caseData }) => caseData)

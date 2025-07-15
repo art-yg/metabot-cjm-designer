@@ -11,6 +11,7 @@ import { exportTags } from "./tags"
 import { exportCustomField } from "./custom-field"
 import { exportIfElse } from "./if-else"
 import { exportSwitch } from "./switch"
+import { exportCallLLM } from "./call-llm"
 
 type NodeExporter = (node: Node<any>) => any
 
@@ -27,6 +28,7 @@ export const exporters: Record<string, NodeExporter> = {
   set_custom_field: exportCustomField,
   if_else: exportIfElse,
   switch: exportSwitch,
+  call_llm: exportCallLLM,
 }
 
 export function exportNode(node: Node<CJMNodeData>): any {
@@ -36,7 +38,7 @@ export function exportNode(node: Node<CJMNodeData>): any {
   }
 
   // Fallback for unknown node types
-  const { label, ...restData } = node.data
+      const { title, ...restData } = node.data
   return {
     ...restData,
     coordinates: { x: Math.round(node.position.x), y: Math.round(node.position.y) },

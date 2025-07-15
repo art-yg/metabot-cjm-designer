@@ -2,7 +2,7 @@ import type { Node } from "reactflow"
 import type { CustomFieldNodeData } from "@/components/cjm-editor/nodes/custom-field-node"
 
 export function exportCustomField(node: Node<CustomFieldNodeData>) {
-  const { label, ...restData } = node.data
+  const { title, ...restData } = node.data
   const processedData = { ...restData }
 
   // Process log_way_steps - remove client-side IDs and export as log_way_steps

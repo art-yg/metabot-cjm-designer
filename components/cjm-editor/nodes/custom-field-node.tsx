@@ -12,7 +12,7 @@ export type CustomFieldScope = "lead" | "bot"
 export interface CustomFieldNodeData {
   code: string
   type: "set_custom_field"
-  label: string // Client-side label
+  title: string // Client-side title
   scope: CustomFieldScope
   key: string
   value: string

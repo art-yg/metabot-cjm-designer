@@ -112,7 +112,7 @@ export function importSendText(step: any): Node<SendTextNodeData> {
     type: "send_text", // This is the internal type for the step data
     content: step.content || "",
     next_step: step.next_step || null,
-    label: "Send Text", // Client-side label for React Flow node
+    title: "Send Text", // Client-side title for React Flow node
     content_per_channel: step.content_per_channel || undefined,
     buttons: importedButtons.length > 0 ? importedButtons : undefined,
     buttons_value_target: step.buttons_value_target || undefined,

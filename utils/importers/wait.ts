@@ -5,7 +5,7 @@ export function importWait(step: any): Node<WaitNodeData> {
   const nodeData: WaitNodeData = {
     code: step.code,
     type: "wait",
-    label: "Ожидание",
+    title: "Ожидание",
     delay: step.delay || {
       days: 0,
       hours: 0,

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 export interface RunScriptNodeData {
   code: string
   type: "run_custom_script"
-  label: string // Client-side label
+  title: string // Client-side title
   script_code: string
   note?: string
 }

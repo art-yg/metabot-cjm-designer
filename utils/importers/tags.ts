@@ -25,7 +25,7 @@ export function importTags(step: any): Node<TagsNodeData> {
   const nodeData: TagsNodeData = {
     code: step.code,
     type: step.type,
-    label: step.type === "add_tags" ? "Добавить теги" : "Удалить теги",
+    title: step.type === "add_tags" ? "Добавить теги" : "Удалить теги",
     tags: step.tags || [],
     next_step: step.next_step || null,
     log_way_steps: importedLogWaySteps, // Import log_way_steps

@@ -15,7 +15,7 @@ export function importSwitch(step: any): Node<SwitchNodeData> {
   const nodeData: SwitchNodeData = {
     code: step.code,
     type: "switch",
-    label: "Switch",
+    title: "Switch",
     cases: importedCases,
     default_step: step.default_step || null,
   }

@@ -10,7 +10,7 @@ export interface EntryPointNodeData {
   code: string
   type: "entry_point"
   name: string
-  label: string // Client-side label
+  title: string // Client-side title
   next_step: string | null
   deep_links: DeepLink[] // НОВОЕ поле
 }

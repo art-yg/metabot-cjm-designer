@@ -95,6 +95,25 @@ export function importFromJson(jsonString: string): {
         }
       }
 
+      // Handle error_step for call_llm nodes
+      if (step.type === "call_llm" && step.error_step) {
+        if (nodes.find((n) => n.id === step.error_step)) {
+          const edge: Edge = {
+            id: `${step.code}-error-${step.error_step}`,
+            source: step.code,
+            target: step.error_step,
+            sourceHandle: "error_step",
+            type: "smoothstep",
+            animated: true,
+          }
+          edges.push(edge)
+        } else {
+          console.warn(
+            `Edge target node ${step.error_step} for source ${step.code} (error_step) not found. Skipping edge.`,
+          )
+        }
+      }
+
       // Handle button connections for send_text nodes
       if (step.type === "send_text" && step.buttons && Array.isArray(step.buttons)) {
         const nodeData = node.data as any

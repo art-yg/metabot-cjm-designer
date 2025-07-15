@@ -11,7 +11,7 @@ export type TagAction = "add" | "remove"
 export interface LogActionNodeData {
   code: string
   type: "log_action"
-  label: string // Client-side label
+  title: string // Client-side title
   log_type: LogActionType
   way?: string
   step?: string

@@ -11,6 +11,7 @@ import { importTags } from "./tags"
 import { importCustomField } from "./custom-field"
 import { importIfElse } from "./if-else"
 import { importSwitch } from "./switch"
+import { importCallLLM } from "./call-llm"
 
 type NodeImporter = (step: any) => Node<CJMNodeData>
 
@@ -27,6 +28,7 @@ export const importers: Record<string, NodeImporter> = {
   set_custom_field: importCustomField,
   if_else: importIfElse,
   switch: importSwitch,
+  call_llm: importCallLLM,
 }
 
 export function importNode(step: any): Node<CJMNodeData> | null {

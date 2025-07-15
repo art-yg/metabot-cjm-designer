@@ -14,7 +14,7 @@ export interface SwitchCase {
 export interface SwitchNodeData {
   code: string
   type: "switch"
-  label: string // Client-side label
+  title: string // Client-side title
   cases: SwitchCase[]
   default_step: string | null
   // ❌ Убрали log_way_steps - развилки не логируют аналитику
@@ -128,7 +128,7 @@ function SwitchNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, typ
       <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
         <div className="flex items-center justify-center mb-2">
           <SwitchCamera size={20} className="text-blue-800 mr-2" />
-          <span className="font-semibold text-sm text-blue-900">{data.label || "Switch"}</span>
+          <span className="font-semibold text-sm text-blue-900">{data.title || "Switch"}</span>
         </div>
 
         <div className="text-xs text-blue-800 text-center max-h-[80px] overflow-y-auto custom-scrollbar">

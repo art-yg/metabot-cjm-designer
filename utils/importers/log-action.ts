@@ -5,7 +5,7 @@ export function importLogAction(step: any): Node<LogActionNodeData> {
   const nodeData: LogActionNodeData = {
     code: step.code,
     type: "log_action",
-    label: "Записать в аналитику",
+    title: "Записать в аналитику",
     log_type: step.log_type || "step",
     way: step.way || "",
     step: step.step || "",

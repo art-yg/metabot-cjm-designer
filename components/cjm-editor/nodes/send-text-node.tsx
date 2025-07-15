@@ -11,7 +11,7 @@ import type { Link } from "@/lib/link-types"
 
 export interface SendTextNodeData {
   code: string
-  label: string
+  title: string
   content: string
   type: "send_text"
   next_step: string | null
@@ -22,7 +22,7 @@ export interface SendTextNodeData {
   links?: Link[]
 }
 
-function SendTextNode({ data, selected, id, isConnectable }: NodeProps<SendTextNodeData>) {
+function SendTextNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, type, dragging }: NodeProps<SendTextNodeData>) {
   const hasChannelOverrides = data.content_per_channel && Object.keys(data.content_per_channel).length > 0
   const hasButtons = data.buttons && data.buttons.length > 0
   const hasValueTarget = data.buttons_value_target && data.buttons_value_target.key
@@ -109,30 +109,41 @@ function SendTextNode({ data, selected, id, isConnectable }: NodeProps<SendTextN
         selected={selected}
         id={id}
         isConnectable={isConnectable}
+        xPos={xPos}
+        yPos={yPos}
+        zIndex={zIndex}
+        type={type}
+        dragging={dragging}
         headerIcon={
           <div className="flex items-center">
             <MessageSquare size={18} className="mr-2 text-blue-600" />
             {hasChannelOverrides && (
-              <Layers size={14} className="text-indigo-500 ml-1" title="Has channel-specific content" />
+              <div title="Has channel-specific content">
+                <Layers size={14} className="text-indigo-500 ml-1" />
+              </div>
             )}
-            {hasButtons && <MousePointer size={14} className="text-green-500 ml-1" title="Has buttons" />}
+            {hasButtons && (
+              <div title="Has buttons">
+                <MousePointer size={14} className="text-green-500 ml-1" />
+              </div>
+            )}
             {hasValueTarget && (
               <div className="w-2 h-2 bg-purple-500 rounded-full ml-1" title="Records button values to attribute" />
             )}
-            {hasButtonTags && <Tags size={14} className="text-orange-500 ml-1" title="Has button tag operations" />}
+            {hasButtonTags && (
+              <div title="Has button tag operations">
+                <Tags size={14} className="text-orange-500 ml-1" />
+              </div>
+            )}
             {hasAnalytics && (
-              <BarChart3
-                size={14}
-                className="text-emerald-500 ml-1"
-                title={`Has ${data.log_way_steps!.steps.length} analytics entries`}
-              />
+              <div title={`Has ${data.log_way_steps!.steps.length} analytics entries`}>
+                <BarChart3 size={14} className="text-emerald-500 ml-1" />
+              </div>
             )}
             {hasLinksWithTriggers && (
-              <LinkIcon
-                size={14}
-                className="text-sky-500 ml-1"
-                title="Has trackable links with active trigger outputs"
-              />
+              <div title="Has trackable links with active trigger outputs">
+                <LinkIcon size={14} className="text-sky-500 ml-1" />
+              </div>
             )}
           </div>
         }
@@ -286,9 +297,6 @@ function SendTextNode({ data, selected, id, isConnectable }: NodeProps<SendTextN
           )}
         </div>
       </NodeBase>
-
-      {/* Входящий handle */}
-      <Handle type="target" position={Position.Left} className="w-3 h-3 bg-green-500 border-2 border-white" />
 
       {/* Основной выход - показываем ВСЕГДА */}
       {showMainOutput && (

@@ -4,9 +4,9 @@ import React from "react"
 import { Handle, Position, type NodeProps } from "reactflow"
 import { cn } from "@/lib/utils"
 
-// A generic data type for the base node, ensuring label or code is present.
+// A generic data type for the base node, ensuring title or code is present.
 interface BaseNodeData {
-  label?: string
+  title?: string
   code: string
 }
 
@@ -38,7 +38,7 @@ function NodeBase({ data, selected, children, headerIcon, className, shape = "re
       <Handle type="target" position={Position.Top} className="!w-3 !h-3 !bg-teal-500" />
       <div className="flex items-center mb-2 border-b pb-2">
         {headerIcon}
-        <div className="font-semibold text-sm text-gray-700 truncate">{data.label || data.code}</div>
+        <div className="font-semibold text-sm text-gray-700 truncate">{data.title || data.code}</div>
       </div>
       <div className="text-xs text-gray-600">{children}</div>
     </div>

@@ -32,6 +32,7 @@ import type {
   IfElseNodeData,
   SwitchNodeData,
   LogActionNodeData,
+  CallLLMNodeData,
 } from "@/app/cjm-editor/types" // Self-reference is fine here
 
 // Union type for all node data
@@ -47,6 +48,7 @@ export type CJMNodeData =
   | IfElseNodeData
   | SwitchNodeData
   | LogActionNodeData
+  | CallLLMNodeData
 
 // CJM Node type
 export type CJMNode = Node<CJMNodeData>

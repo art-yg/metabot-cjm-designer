@@ -11,7 +11,7 @@ export interface GoToMapEntryNodeData {
   target_map: string
   entry_point: string
   note?: string
-  label: string // Client-side label
+  title: string // Client-side title
 }
 
 function GoToMapEntryNode({

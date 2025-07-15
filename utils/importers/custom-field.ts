@@ -25,7 +25,7 @@ export function importCustomField(step: any): Node<CustomFieldNodeData> {
   const nodeData: CustomFieldNodeData = {
     code: step.code,
     type: "set_custom_field",
-    label: "Установить поле",
+    title: "Установить поле",
     scope: step.scope || "lead",
     key: step.key || "",
     value: step.value || "",
