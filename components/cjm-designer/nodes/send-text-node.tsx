@@ -116,7 +116,9 @@ function SendTextNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, t
         dragging={dragging}
         headerIcon={
           <div className="flex items-center">
-            <MessageSquare size={18} className="mr-2 text-blue-600" />
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-500 text-white mr-2">
+              <MessageSquare size={18} />
+            </span>
             {hasChannelOverrides && (
               <div title="Has channel-specific content">
                 <Layers size={14} className="text-indigo-500 ml-1" />

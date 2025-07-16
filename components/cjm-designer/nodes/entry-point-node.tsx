@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Handle, Position, type NodeProps } from "reactflow"
-import { Flag, ExternalLink } from "lucide-react"
+import { Play, ExternalLink } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { DeepLink } from "@/lib/deep-link-types"
 
@@ -64,7 +64,7 @@ function EntryPointNode({
         )}
       >
         {/* Icon */}
-        <Flag size={28} className="text-white" />
+                    <Play size={28} className="text-white" />
 
         {/* Only output handle at bottom */}
         <Handle

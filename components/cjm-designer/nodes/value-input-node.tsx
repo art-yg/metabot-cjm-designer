@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Handle, Position, type NodeProps } from "reactflow"
-import { TextCursorInput, Clock, BarChart3 } from "lucide-react"
+import { KeyboardIcon, Clock, BarChart3 } from "lucide-react"
 import NodeBase from "./node-base"
 import type { ChannelOverrides } from "@/lib/channel-types"
 import type { LogWayData } from "@/lib/analytics-types"
@@ -63,7 +63,9 @@ function ValueInputNode({
       type={type}
       headerIcon={
         <div className="flex items-center">
-          <TextCursorInput size={18} className="mr-2 text-purple-600" />
+          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-purple-500 text-white mr-2">
+            <KeyboardIcon size={18} />
+          </span>
           {hasReminders && (
             <Clock size={14} className="text-orange-500" title={`Has ${data.reminders?.length} reminder(s)`} />
           )}

@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Handle, Position, type NodeProps } from "reactflow"
-import { GitBranch } from "lucide-react"
+import { Split } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export interface IfElseNodeData {
@@ -35,7 +35,7 @@ function IfElseNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, typ
       {/* Content - rotated back to be readable */}
       <div className="absolute inset-0 -rotate-45 flex flex-col items-center justify-center p-3">
         <div className="flex items-center justify-center mb-2">
-          <GitBranch size={20} className="text-yellow-800 mr-2" />
+          <Split size={20} className="text-yellow-800 mr-2" />
           <span className="font-semibold text-sm text-yellow-900">{data.title || "Условие"}</span>
         </div>
         <div className="text-xs text-yellow-800 text-center max-w-full overflow-hidden">

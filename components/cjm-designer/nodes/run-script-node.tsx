@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Handle, Position, type NodeProps } from "reactflow"
-import { ArrowRightCircle } from "lucide-react"
+import { Code } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export interface RunScriptNodeData {
@@ -31,7 +31,7 @@ function RunScriptNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, 
       />
 
       {/* Icon - changed to ArrowRightCircle like GoToMapEntry */}
-      <ArrowRightCircle size={28} className="text-white" />
+      <Code size={28} className="text-white" />
 
       {/* Script info label - adjusted spacing and text wrapping */}
       <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 text-xs text-center">

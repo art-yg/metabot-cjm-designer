@@ -44,7 +44,11 @@ function WaitNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, type 
       yPos={yPos}
       zIndex={zIndex}
       type={type}
-      headerIcon={<Clock size={18} className="mr-2 text-orange-600" />}
+      headerIcon={
+        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-orange-500 text-white mr-2">
+          <Clock size={18} />
+        </span>
+      }
       className="border-orange-300 hover:border-orange-400"
       shape="hexagon" // Add hexagon shape
     >

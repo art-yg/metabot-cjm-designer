@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Handle, Position, type NodeProps } from "reactflow"
-import { ArrowRightCircle } from "lucide-react"
+import { Target } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export interface GoToMapEntryNodeData {
@@ -41,7 +41,7 @@ function GoToMapEntryNode({
       />
 
       {/* Icon */}
-      <ArrowRightCircle size={28} className="text-white" />
+                <Target size={28} className="text-white" />
 
       {/* Target info label */}
       <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 text-xs text-center">

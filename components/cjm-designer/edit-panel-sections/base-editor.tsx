@@ -1,12 +1,48 @@
 "use client"
 
 import type React from "react"
-import { X, Save } from "lucide-react"
+import { X, Save, MessageSquare, Clock, Code, KeyboardIcon, User, Split, Shuffle, Brain, BookOpen, BarChart, Tags, Play, Target } from "lucide-react"
 import { toast } from "react-hot-toast"
 import type { CJMNode, CJMNodeData } from "@/app/cjm-designer/types"
 import AnalyticsSection from "./analytics-section"
 import type { LogWayData } from "@/lib/analytics-types"
 import { useState, useEffect } from "react"
+
+// Функция для получения иконки и цвета по типу узла
+function getNodeIconAndColor(nodeType: string) {
+  switch (nodeType) {
+    case "send_text":
+      return { icon: MessageSquare, color: "bg-blue-500" }
+    case "wait":
+      return { icon: Clock, color: "bg-orange-500" }
+    case "run_custom_script":
+      return { icon: Code, color: "bg-amber-600" }
+    case "value_input":
+      return { icon: KeyboardIcon, color: "bg-purple-500" }
+    case "set_custom_field":
+      return { icon: User, color: "bg-indigo-500" }
+    case "if_else":
+      return { icon: Split, color: "bg-yellow-500" }
+    case "switch":
+      return { icon: Shuffle, color: "bg-blue-400" }
+    case "call_llm":
+      return { icon: Brain, color: "bg-amber-700" }
+    case "search_knowledgebase":
+      return { icon: BookOpen, color: "bg-purple-600" }
+    case "log_action":
+      return { icon: BarChart, color: "bg-emerald-500" }
+    case "add_tags":
+      return { icon: Tags, color: "bg-green-500" }
+    case "remove_tags":
+      return { icon: Tags, color: "bg-red-500" }
+    case "entry_point":
+      return { icon: Play, color: "bg-green-500" }
+    case "go_to_map_entry":
+      return { icon: Target, color: "bg-purple-500" }
+    default:
+      return { icon: MessageSquare, color: "bg-gray-500" }
+  }
+}
 
 interface BaseEditorProps {
   node: CJMNode
@@ -99,7 +135,17 @@ function BaseEditor({
     <div className={isModal ? "w-full" : "w-96 bg-white p-4 border-l border-gray-200 shadow-lg flex flex-col h-full"}>
       {!isModal && (
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-gray-700">Edit Step: {labelOverride ?? node.data.title ?? node.data.code}</h3>
+          <div className="flex items-center gap-3">
+            {(() => {
+              const { icon: IconComponent, color } = getNodeIconAndColor(node.data.type)
+              return (
+                <span className={`inline-flex items-center justify-center w-7 h-7 ${color} rounded-lg`}>
+                  <IconComponent size={16} className="text-white" />
+                </span>
+              )
+            })()}
+            <h3 className="text-lg font-semibold text-gray-700">Edit Step: {labelOverride ?? node.data.title ?? node.data.code}</h3>
+          </div>
           <button
             onClick={onClose}
             className="p-1 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100"

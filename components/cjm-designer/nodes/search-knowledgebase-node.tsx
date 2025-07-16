@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Handle, Position, type NodeProps } from "reactflow"
-import { Search, BookOpenCheck, BarChart3 } from "lucide-react"
+import { Search, BookOpen, BarChart3 } from "lucide-react"
 import NodeBase from "./node-base"
 import type { LogWayData } from "@/lib/analytics-types"
 
@@ -47,7 +47,7 @@ function SearchKnowledgebaseNode({
       dragging={dragging}
       headerIcon={
         <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-purple-600 text-white mr-2">
-          <Search size={18} />
+          <BookOpen size={18} />
         </span>
       }
     >

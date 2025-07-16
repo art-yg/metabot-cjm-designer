@@ -33,8 +33,9 @@ function TagsNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, type 
       type={type}
       headerIcon={
         <div className="flex items-center">
-          <Tags size={18} className={`mr-2 ${iconColor}`} />
-          <Icon size={14} className={iconColor} />
+          <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full ${isAddTags ? 'bg-green-500' : 'bg-red-500'} text-white mr-2`}>
+            <Tags size={18} />
+          </span>
           {hasAnalytics && (
             <BarChart3
               size={14}

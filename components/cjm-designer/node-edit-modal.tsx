@@ -1,12 +1,48 @@
 "use client"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { X, Save, Check } from "lucide-react"
+import { X, Save, Check, MessageSquare, Clock, Code, KeyboardIcon, User, Split, Shuffle, Brain, BookOpen, BarChart, Tags, Play, Target } from "lucide-react"
 import { toast } from "react-hot-toast"
 import EditorFactory from "@/components/cjm-designer/edit-panel-sections/editor-factory"
 import { ConfirmDialog } from "./confirm-dialog"
 import type { CJMNode, CJMNodeData } from "@/app/cjm-designer/types"
 import type { MapSettings } from "@/lib/map-settings"
+
+// Функция для получения иконки и цвета по типу узла
+function getNodeIconAndColor(nodeType: string) {
+  switch (nodeType) {
+    case "send_text":
+      return { icon: MessageSquare, color: "bg-blue-500" }
+    case "wait":
+      return { icon: Clock, color: "bg-orange-500" }
+    case "run_custom_script":
+      return { icon: Code, color: "bg-amber-600" }
+    case "value_input":
+      return { icon: KeyboardIcon, color: "bg-purple-500" }
+    case "set_custom_field":
+      return { icon: User, color: "bg-indigo-500" }
+    case "if_else":
+      return { icon: Split, color: "bg-yellow-500" }
+    case "switch":
+      return { icon: Shuffle, color: "bg-blue-400" }
+    case "call_llm":
+      return { icon: Brain, color: "bg-amber-700" }
+    case "search_knowledgebase":
+      return { icon: BookOpen, color: "bg-purple-600" }
+    case "log_action":
+      return { icon: BarChart, color: "bg-emerald-500" }
+    case "add_tags":
+      return { icon: Tags, color: "bg-green-500" }
+    case "remove_tags":
+      return { icon: Tags, color: "bg-red-500" }
+    case "entry_point":
+      return { icon: Play, color: "bg-green-500" }
+    case "go_to_map_entry":
+      return { icon: Target, color: "bg-purple-500" }
+    default:
+      return { icon: MessageSquare, color: "bg-gray-500" }
+  }
+}
 
 interface NodeEditModalProps {
   isOpen: boolean
@@ -136,6 +172,14 @@ export function NodeEditModal({
         <div className="px-6 py-4 border-b bg-white rounded-t-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
+              {(() => {
+                const { icon: IconComponent, color } = getNodeIconAndColor(localNodeData.type)
+                return (
+                  <span className={`inline-flex items-center justify-center w-8 h-8 ${color} rounded-lg`}>
+                    <IconComponent size={18} className="text-white" />
+                  </span>
+                )
+              })()}
               <h2 className="text-xl font-semibold">
                 Редактирование: {localNodeData.title || localNodeData.code}
               </h2>

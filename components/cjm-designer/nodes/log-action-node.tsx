@@ -49,7 +49,11 @@ function LogActionNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, 
       yPos={yPos}
       zIndex={zIndex}
       type={type}
-      headerIcon={<BarChart3 size={18} className="mr-2 text-emerald-600" />}
+      headerIcon={
+        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-500 text-white mr-2">
+          <BarChart3 size={18} />
+        </span>
+      }
       className="border-emerald-300 hover:border-emerald-400"
     >
       <div className="space-y-1">

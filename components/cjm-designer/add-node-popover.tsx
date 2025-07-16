@@ -56,27 +56,7 @@ export function AddNodePopover({ isOpen, onClose, nodeCreators }: AddNodePopover
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
   const nodeTypes: NodeType[] = [
-    // Логические операторы
-    {
-      id: "if-else",
-      title: "IF / ELSE",
-      description: "Условное ветвление на основе проверки условий",
-      category: "Логические операторы",
-      icon: Split,
-      color: "bg-yellow-500",
-      action: () => { nodeCreators.onAddIfElseNode(); onClose(); }
-    },
-    {
-      id: "switch",
-      title: "SWITCH",
-      description: "Множественное ветвление по значению переменной",
-      category: "Логические операторы",
-      icon: Shuffle,
-      color: "bg-blue-400",
-      action: () => { nodeCreators.onAddSwitchNode(); onClose(); }
-    },
-    
-    // Шаги коммуникации
+    // Шаги коммуникации (первое место)
     {
       id: "send-text",
       title: "Отправить текст",
@@ -85,15 +65,6 @@ export function AddNodePopover({ isOpen, onClose, nodeCreators }: AddNodePopover
       icon: MessageSquare,
       color: "bg-blue-500",
       action: () => { nodeCreators.onAddSendTextNode(); onClose(); }
-    },
-    {
-      id: "user-input",
-      title: "Ввод пользователя",
-      description: "Ожидание ввода данных от пользователя",
-      category: "Шаги коммуникации",
-      icon: KeyboardIcon,
-      color: "bg-purple-500",
-      action: () => { nodeCreators.onAddInputNode(); onClose(); }
     },
     {
       id: "wait",
@@ -113,47 +84,53 @@ export function AddNodePopover({ isOpen, onClose, nodeCreators }: AddNodePopover
       color: "bg-amber-600",
       action: () => { nodeCreators.onAddRunScriptNode(); onClose(); }
     },
+    
+    // Команды ввода (второе место)
     {
-      id: "add-tags",
-      title: "Добавить теги",
-      description: "Добавление тегов к пользователю",
-      category: "Шаги коммуникации",
-      icon: Tags,
-      color: "bg-green-500",
-      action: () => { nodeCreators.onAddTagsNode("add_tags"); onClose(); }
-    },
-    {
-      id: "remove-tags",
-      title: "Удалить теги",
-      description: "Удаление тегов у пользователя",
-      category: "Шаги коммуникации",
-      icon: Tags,
-      color: "bg-red-500",
-      action: () => { nodeCreators.onAddTagsNode("remove_tags"); onClose(); }
+      id: "user-input",
+      title: "Ввод пользователя",
+      description: "Ожидание ввода данных от пользователя",
+      category: "Команды ввода",
+      icon: KeyboardIcon,
+      color: "bg-purple-500",
+      action: () => { nodeCreators.onAddInputNode(); onClose(); }
     },
     {
       id: "custom-field",
       title: "Установить поле",
       description: "Установка значения пользовательского поля",
-      category: "Шаги коммуникации",
+      category: "Команды ввода",
       icon: User,
       color: "bg-indigo-500",
       action: () => { nodeCreators.onAddCustomFieldNode(); onClose(); }
     },
+    
+    // Логические операторы (третье место)
     {
-      id: "log-action",
-      title: "Записать в аналитику",
-      description: "Логирование события для аналитики",
-      category: "Шаги коммуникации",
-      icon: BarChart,
-      color: "bg-emerald-500",
-      action: () => { nodeCreators.onAddLogActionNode(); onClose(); }
+      id: "if-else",
+      title: "IF / ELSE",
+      description: "Условное ветвление на основе проверки условий",
+      category: "Логические операторы",
+      icon: Split,
+      color: "bg-yellow-500",
+      action: () => { nodeCreators.onAddIfElseNode(); onClose(); }
     },
+    {
+      id: "switch",
+      title: "SWITCH",
+      description: "Множественное ветвление по значению переменной",
+      category: "Логические операторы",
+      icon: Shuffle,
+      color: "bg-blue-400",
+      action: () => { nodeCreators.onAddSwitchNode(); onClose(); }
+    },
+    
+    // Искусственный интеллект (четвертое место)
     {
       id: "call-llm",
       title: "Обращение к LLM",
       description: "Запрос к языковой модели ИИ",
-      category: "Шаги коммуникации",
+      category: "Искусственный интеллект",
       icon: Brain,
       color: "bg-amber-700",
       action: () => { nodeCreators.onAddCallLLMNode(); onClose(); }
@@ -162,18 +139,47 @@ export function AddNodePopover({ isOpen, onClose, nodeCreators }: AddNodePopover
       id: "search-kb",
       title: "Поиск по базе знаний",
       description: "Поиск информации в базе знаний",
-      category: "Шаги коммуникации",
+      category: "Искусственный интеллект",
       icon: BookOpen,
       color: "bg-purple-600",
       action: () => { nodeCreators.onAddSearchKnowledgebaseNode(); onClose(); }
     },
     
-    // Системные команды
+    // Аналитика и теги (пятое место)
+    {
+      id: "log-action",
+      title: "Записать в аналитику",
+      description: "Логирование события для аналитики",
+      category: "Аналитика и теги",
+      icon: BarChart,
+      color: "bg-emerald-500",
+      action: () => { nodeCreators.onAddLogActionNode(); onClose(); }
+    },
+    {
+      id: "add-tags",
+      title: "Добавить теги",
+      description: "Добавление тегов к пользователю",
+      category: "Аналитика и теги",
+      icon: Tags,
+      color: "bg-green-500",
+      action: () => { nodeCreators.onAddTagsNode("add_tags"); onClose(); }
+    },
+    {
+      id: "remove-tags",
+      title: "Удалить теги",
+      description: "Удаление тегов у пользователя",
+      category: "Аналитика и теги",
+      icon: Tags,
+      color: "bg-red-500",
+      action: () => { nodeCreators.onAddTagsNode("remove_tags"); onClose(); }
+    },
+    
+    // Переходы и точки входа (шестое место)
     {
       id: "entry-point",
       title: "Точка входа",
       description: "Начальная точка сценария",
-      category: "Системные команды",
+      category: "Переходы и точки входа",
       icon: Play,
       color: "bg-green-500",
       action: () => { nodeCreators.onAddEntryPointNode(); onClose(); }
@@ -182,7 +188,7 @@ export function AddNodePopover({ isOpen, onClose, nodeCreators }: AddNodePopover
       id: "go-to-map",
       title: "Переход в воронку",
       description: "Переход к другому сценарию",
-      category: "Системные команды",
+      category: "Переходы и точки входа",
       icon: Target,
       color: "bg-purple-500",
       action: () => { nodeCreators.onAddGoToMapEntryNode(); onClose(); }
@@ -204,7 +210,19 @@ export function AddNodePopover({ isOpen, onClose, nodeCreators }: AddNodePopover
     return acc
   }, {} as Record<string, NodeType[]>)
 
-  const categories = Array.from(new Set(nodeTypes.map(node => node.category)))
+  // Правильный порядок категорий
+  const categoryOrder = [
+    "Шаги коммуникации",
+    "Команды ввода", 
+    "Логические операторы",
+    "Искусственный интеллект",
+    "Аналитика и теги",
+    "Переходы и точки входа"
+  ]
+
+  const categories = categoryOrder.filter(cat => 
+    nodeTypes.some(node => node.category === cat)
+  )
 
   const handleClose = () => {
     setSearchTerm("")
@@ -214,36 +232,14 @@ export function AddNodePopover({ isOpen, onClose, nodeCreators }: AddNodePopover
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col p-0">
+        <DialogHeader className="p-4 pb-2">
           <DialogTitle>Добавить компонент</DialogTitle>
         </DialogHeader>
         
-        {/* Фильтры по категориям */}
-        <div className="flex gap-2 mb-4 flex-wrap">
-          <Button
-            variant={selectedCategory === null ? "default" : "outline"}
-            size="sm"
-            onClick={() => setSelectedCategory(null)}
-            className="h-8"
-          >
-            Все
-          </Button>
-          {categories.map(category => (
-            <Button
-              key={category}
-              variant={selectedCategory === category ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedCategory(category)}
-              className="h-8 text-xs"
-            >
-              {category}
-            </Button>
-          ))}
-        </div>
-
-        <div className="flex items-center space-x-2 mb-4">
-          <div className="relative flex-1">
+        {/* Поиск */}
+        <div className="px-4 pb-3">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               placeholder="Поиск компонентов..."
@@ -253,35 +249,96 @@ export function AddNodePopover({ isOpen, onClose, nodeCreators }: AddNodePopover
             />
           </div>
         </div>
-        
-        <div className="flex-1 overflow-y-auto space-y-6">
-          {Object.entries(groupedNodes).map(([category, nodes]) => (
-            <div key={category}>
-              <h3 className="text-sm font-medium text-gray-600 mb-3 border-b pb-1">
-                {category}
-              </h3>
-              <div className="grid grid-cols-1 gap-3">
-                {nodes.map(node => {
-                  const IconComponent = node.icon
+
+        {/* Основной контент */}
+        <div className="flex flex-1 min-h-0">
+          {/* Боковая панель с категориями */}
+          <div className="w-56 border-r bg-gray-50 p-3">
+            <div className="space-y-1">
+              <Button
+                variant={selectedCategory === null ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setSelectedCategory(null)}
+                className="w-full justify-start text-left h-auto py-1.5 px-2"
+              >
+                <span className="text-sm">Все категории</span>
+              </Button>
+              {categories.map(category => (
+                <Button
+                  key={category}
+                  variant={selectedCategory === category ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setSelectedCategory(category)}
+                  className="w-full justify-start text-left h-auto py-1.5 px-2"
+                >
+                  <span className="text-sm">{category}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Список команд */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {selectedCategory === null ? (
+              // Показать все группы
+              <div className="space-y-5">
+                {categoryOrder.map(category => {
+                  const nodes = groupedNodes[category]
+                  if (!nodes || nodes.length === 0) return null
+                  
                   return (
-                    <div
-                      key={node.id}
-                      className="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm cursor-pointer transition-all group"
-                      onClick={node.action}
-                    >
-                      <div className={`flex-shrink-0 w-10 h-10 ${node.color} rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform`}>
-                        <IconComponent size={20} className="text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm text-gray-900 group-hover:text-gray-700">{node.title}</div>
-                        <div className="text-xs text-gray-500 mt-1 leading-relaxed">{node.description}</div>
+                    <div key={category}>
+                      <h3 className="text-sm font-medium text-gray-600 mb-2 border-b pb-1">
+                        {category}
+                      </h3>
+                      <div className="grid grid-cols-1 gap-2">
+                        {nodes.map(node => {
+                          const IconComponent = node.icon
+                          return (
+                            <div
+                              key={node.id}
+                              className="flex items-start gap-3 p-2.5 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm cursor-pointer transition-all group"
+                              onClick={node.action}
+                            >
+                              <div className={`flex-shrink-0 w-9 h-9 ${node.color} rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform`}>
+                                <IconComponent size={18} className="text-white" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium text-sm text-gray-900 group-hover:text-gray-700">{node.title}</div>
+                                <div className="text-xs text-gray-500 mt-0.5 leading-relaxed">{node.description}</div>
+                              </div>
+                            </div>
+                          )
+                        })}
                       </div>
                     </div>
                   )
                 })}
               </div>
-            </div>
-          ))}
+            ) : (
+              // Показать только выбранную категорию
+              <div className="grid grid-cols-1 gap-2">
+                {(groupedNodes[selectedCategory] || []).map(node => {
+                  const IconComponent = node.icon
+                  return (
+                    <div
+                      key={node.id}
+                      className="flex items-start gap-3 p-2.5 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm cursor-pointer transition-all group"
+                      onClick={node.action}
+                    >
+                      <div className={`flex-shrink-0 w-9 h-9 ${node.color} rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform`}>
+                        <IconComponent size={18} className="text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm text-gray-900 group-hover:text-gray-700">{node.title}</div>
+                        <div className="text-xs text-gray-500 mt-0.5 leading-relaxed">{node.description}</div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

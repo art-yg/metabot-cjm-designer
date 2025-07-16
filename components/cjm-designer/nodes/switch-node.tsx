@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Handle, Position, type NodeProps } from "reactflow"
-import { SwitchCamera } from "lucide-react"
+import { Shuffle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export interface SwitchCase {
@@ -127,7 +127,7 @@ function SwitchNode({ data, selected, id, isConnectable, xPos, yPos, zIndex, typ
       {/* Content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
         <div className="flex items-center justify-center mb-2">
-          <SwitchCamera size={20} className="text-blue-800 mr-2" />
+                      <Shuffle size={20} className="text-blue-800 mr-2" />
           <span className="font-semibold text-sm text-blue-900">{data.title || "Switch"}</span>
         </div>
 
