@@ -25,6 +25,8 @@ import { CompactToolbar } from "@/components/cjm-designer/compact-toolbar"
 import { ZoomControls } from "@/components/cjm-designer/zoom-controls"
 import { AddNodePopover } from "@/components/cjm-designer/add-node-popover"
 import { NodeEditModal } from "@/components/cjm-designer/node-edit-modal"
+import { KnowledgeBaseModal } from "@/components/cjm-designer/knowledge-base-modal"
+import { PromptsModal } from "@/components/cjm-designer/prompts-modal"
 
 import type { useCJMDesigner } from "@/hooks/use-cjm-designer"
 import type { CJMNode } from "@/app/cjm-designer/types"
@@ -104,6 +106,10 @@ export function CJMDesigner({ editorState }: CJMDesignerProps) {
   const [isAddNodePopoverOpen, setIsAddNodePopoverOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null)
+  
+  // Состояния для модальных окон MetaTables
+  const [isKnowledgeBaseModalOpen, setIsKnowledgeBaseModalOpen] = useState(false)
+  const [isPromptsModalOpen, setIsPromptsModalOpen] = useState(false)
 
   // Отладка mapSettings
   // console.log("CJMEditor mapSettings:", mapSettings)
@@ -161,6 +167,8 @@ export function CJMDesigner({ editorState }: CJMDesignerProps) {
         selectedTool={selectedTool}
         onToolSelect={setSelectedTool}
         onAddNode={() => setIsAddNodePopoverOpen(true)}
+        onKnowledgeBaseOpen={() => setIsKnowledgeBaseModalOpen(true)}
+        onPromptsOpen={() => setIsPromptsModalOpen(true)}
       />
 
       {/* Zoom controls в правом нижнем углу */}
@@ -218,6 +226,19 @@ export function CJMDesigner({ editorState }: CJMDesignerProps) {
         onClose={() => setIsSettingsModalOpen(false)}
         settings={mapSettings}
         onSave={setMapSettings}
+      />
+
+      {/* Модальные окна MetaTables */}
+      <KnowledgeBaseModal
+        isOpen={isKnowledgeBaseModalOpen}
+        onClose={() => setIsKnowledgeBaseModalOpen(false)}
+        mapSettings={mapSettings}
+      />
+
+      <PromptsModal
+        isOpen={isPromptsModalOpen}
+        onClose={() => setIsPromptsModalOpen(false)}
+        mapSettings={mapSettings}
       />
 
       <Toaster position="bottom-right" containerStyle={{ zIndex: 9999 }} />

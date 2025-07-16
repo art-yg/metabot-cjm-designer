@@ -1,6 +1,5 @@
 "use client"
 import { AlertTriangle, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
 
 interface ConfirmDialogProps {
   isOpen: boolean
@@ -51,12 +50,12 @@ export function ConfirmDialog({
 
   return (
     <div 
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-50"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-50"
       onClick={onCancel}
     >
       <div 
-        className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 overflow-hidden animate-in fade-in-0 zoom-in-95 duration-200"
-        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 overflow-hidden"
+        onClick={(e: any) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200">
@@ -89,30 +88,29 @@ export function ConfirmDialog({
         <div className="px-4 py-4 bg-gray-50 border-t border-gray-200">
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end">
             {/* Кнопка отмены */}
-            <Button
-              variant="outline"
+            <button
               onClick={onCancel}
-              className="order-3 sm:order-1 min-w-[90px] text-sm"
+              className="order-3 sm:order-1 min-w-[90px] text-sm px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors"
             >
               {cancelText}
-            </Button>
+            </button>
             
-            {/* Кнопка закрыть без сохранения */}
-            <Button
+            {/* Кнопка подтверждения */}
+            <button
               onClick={onConfirm}
-              className={`order-2 sm:order-2 min-w-[140px] text-sm ${styles.confirmButton}`}
+              className={`order-2 sm:order-2 min-w-[140px] text-sm px-4 py-2 rounded-md transition-colors ${styles.confirmButton}`}
             >
               {confirmText}
-            </Button>
+            </button>
             
             {/* Кнопка сохранить и закрыть - если есть (приоритетная) */}
             {onSave && saveText && (
-              <Button
+              <button
                 onClick={onSave}
-                className="order-1 sm:order-3 min-w-[140px] text-sm bg-green-600 hover:bg-green-700 text-white"
+                className="order-1 sm:order-3 min-w-[140px] text-sm px-4 py-2 rounded-md bg-green-600 hover:bg-green-700 text-white transition-colors"
               >
                 {saveText}
-              </Button>
+              </button>
             )}
           </div>
         </div>

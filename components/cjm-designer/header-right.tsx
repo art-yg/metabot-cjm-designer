@@ -24,7 +24,7 @@ export function HeaderRight({
         className="text-xs"
       >
         <RotateCcw size={14} className="mr-1.5" />
-        Load Draft
+        Загрузить
       </Button>
       
       <Button
@@ -34,7 +34,7 @@ export function HeaderRight({
         className="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100"
       >
         <Save size={14} className="mr-1.5" />
-        Save Draft
+        Сохранить
       </Button>
       
       <Button

@@ -42,8 +42,8 @@ export class CJMOperations {
     // Загружаем API настройки из localStorage
     const apiSettings = loadApiSettings()
 
-    // Подставляем bot_id в URL
-    const apiUrl = apiSettings.endpoint.replace("{bot_id}", mapSettings.bot_id.toString())
+    // Подставляем bot_id в URL и добавляем endpoint для CJM
+    const apiUrl = apiSettings.endpoint.replace("{bot_id}", mapSettings.bot_id.toString()) + "cjm/import"
 
     const jsonPayload = exportToJson(nodes, edges, mapSettings)
     const payload = JSON.parse(jsonPayload)
