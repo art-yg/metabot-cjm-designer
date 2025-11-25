@@ -1,30 +1,57 @@
-# CJM Designer
+# Metabot CJM Designer
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+> Visual no-code editor for building funnels, customer journeys and AI pipelines on top of the Metabot low-code engine.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/artem-3218s-projects/v0-cjm-designer)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/xZF06HjgAhD)
+This repository contains the open-source example of the **Metabot CJM Designer**, built as part of the tutorial:
 
-## Overview
+👉 **How to Build a Visual No-Code Funnel Editor and AI Pipeline Builder on React on Top of Metabot Low-Code**  
+https://docs.metabot24.ru/books/metabot-cernoviki/page/kak-postroit-vizualnyi-no-code-redaktor-voronok-i-ai-paiplainov-na-react-poverx-low-code-yadra-metabot
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+Live demo:  
+👉 https://cjm.metabot24.ru/cjm-designer  
 
-## Deployment
+---
 
-Your project is live at:
+## What this repository includes
 
-**[https://vercel.com/artem-3218s-projects/v0-cjm-designer](https://vercel.com/artem-3218s-projects/v0-cjm-designer)**
+- Example implementation of a React-based visual editor
+- Core UI logic: nodes, edges, inspector dialogs, toolbar, import/export
+- JSON schema used to describe funnel steps
+- Integration with Metabot through the `cjm/import` API endpoint
+- Example of no-code → low-code transformation
+- A reference implementation for building your own designer
 
-## Build your app
+This code is a part of the educational series about extending Metabot with custom frontends and no-code tools.  
+You can:
 
-Continue building your app on:
+- **fork this repository** and evolve it,  
+- use it as a **starting point** for your own editor,  
+- or build a **completely new designer** using our open JSON format.
 
-**[https://v0.dev/chat/projects/xZF06HjgAhD](https://v0.dev/chat/projects/xZF06HjgAhD)**
+---
 
-## How It Works
+## Related Repository (Specifications)
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+For recovered specifications, drafts and design notes used during development:  
+👉 https://github.com/Artem-G/metabot-cjm-designer-specs
+
+These specs can help if you want to rebuild the editor from scratch or create your own version.
+
+---
+
+## License
+
+The project is distributed under **Apache 2.0 License**, allowing modification and commercial usage while protecting Metabot trademarks and preventing patent-related conflicts.
+
+---
+
+## Links
+
+- 🌐 Metabot Platform — https://app.metabot24.com  
+- 📘 Metabot Documentation — https://docs.metabot24.ru  
+- 🔧 Metabot CJM Designer (demo) — https://cjm.metabot24.ru/cjm-designer  
+- 📦 CJM Designer Specs — https://github.com/Artem-G/metabot-cjm-designer-specs
+
+---
+
+🇷🇺 **Russian version:** [README.ru.md](README.ru.md)
