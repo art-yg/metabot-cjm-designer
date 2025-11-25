@@ -50,7 +50,8 @@ The project is distributed under **Apache 2.0 License**, allowing modification a
 - 🌐 Metabot Platform — https://app.metabot24.com  
 - 📘 Metabot Documentation — https://docs.metabot24.ru  
 - 🔧 Metabot CJM Designer (demo) — https://cjm.metabot24.ru/cjm-designer  
-- 📦 CJM Designer Specs — https://github.com/Artem-G/metabot-cjm-designer-specs
+- 📦 CJM Developer Specs — https://github.com/art-yg/metabot-cjm-designer-specs
+- 📦 CJM Source Code — https://github.com/art-yg/metabot-cjm-designer
 
 ---
 
