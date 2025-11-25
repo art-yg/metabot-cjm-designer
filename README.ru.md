@@ -49,7 +49,8 @@ https://docs.metabot24.ru/books/metabot-cernoviki/page/kak-postroit-vizualnyi-no
 - 🌐 Платформа Metabot — https://app.metabot24.com  
 - 📘 Документация Metabot — https://docs.metabot24.ru  
 - 🔧 CJM Designer (демо) — https://cjm.metabot24.ru/cjm-designer  
-- 📦 Спецификации CJM Designer — https://github.com/Artem-G/metabot-cjm-designer-specs
+- 📦 Спецификации — https://github.com/art-yg/metabot-cjm-designer-specs
+- 📦 Исходный код — https://github.com/art-yg/metabot-cjm-designer
 
 ---
 
